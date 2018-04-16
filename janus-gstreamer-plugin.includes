@@ -1,0 +1,4 @@
+plugins/gstreamer
+/opt/janus/include
+/opt/janus/include/janus
+/opt/janus/include/janus/plugins
