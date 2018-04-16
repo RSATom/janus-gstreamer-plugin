@@ -18,4 +18,6 @@ Makefile
 /ltmain.sh
 /missing
 
+*.creator.user
+
 .deps/
