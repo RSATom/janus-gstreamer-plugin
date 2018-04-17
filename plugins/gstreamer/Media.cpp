@@ -34,6 +34,8 @@ struct Media::Private
 
     std::deque<GstAppSink*> rtpSinks;
 
+    void setState(GstState);
+
     void prepare();
     void pause();
     void play();
@@ -52,6 +54,28 @@ struct Media::Private
 
     gboolean onBusMessage(GstBus*, GstMessage*);
 };
+
+void Media::Private::setState(GstState state)
+{
+    GstElement* pipeline = pipelinePtr.get();
+    if(!pipeline) {
+        if(state != GST_STATE_NULL)
+            JANUS_LOG(LOG_ERR, "Media::Private::setState. Pipeline is not initialized\n");
+        return;
+    }
+
+    switch(gst_element_set_state(pipeline, state)) {
+        case GST_STATE_CHANGE_FAILURE:
+            JANUS_LOG(LOG_ERR, "Media::Private::setState. gst_element_set_state failed\n");
+            break;
+        case GST_STATE_CHANGE_SUCCESS:
+            break;
+        case GST_STATE_CHANGE_ASYNC:
+            break;
+        case GST_STATE_CHANGE_NO_PREROLL:
+            break;
+    }
+}
 
 void Media::Private::prepare()
 {
@@ -115,44 +139,12 @@ void Media::Private::prepare()
 
 void Media::Private::pause()
 {
-    GstElement* pipeline = pipelinePtr.get();
-    if(!pipeline) {
-        JANUS_LOG(LOG_ERR, "Media::Private::pause. Pipeline is not initialized\n");
-        return;
-    }
-
-    switch(gst_element_set_state(pipeline, GST_STATE_PAUSED)) {
-        case GST_STATE_CHANGE_FAILURE:
-            JANUS_LOG(LOG_ERR, "Media::Private::play. gst_element_set_state failed\n");
-            break;
-        case GST_STATE_CHANGE_SUCCESS:
-            break;
-        case GST_STATE_CHANGE_ASYNC:
-            break;
-        case GST_STATE_CHANGE_NO_PREROLL:
-            break;
-    }
+    setState(GST_STATE_PAUSED);
 }
 
 void Media::Private::play()
 {
-    GstElement* pipeline = pipelinePtr.get();
-    if(!pipeline) {
-        JANUS_LOG(LOG_ERR, "Media::Private::play. Pipeline is not initialized\n");
-        return;
-    }
-
-    switch(gst_element_set_state(pipeline, GST_STATE_PLAYING)) {
-        case GST_STATE_CHANGE_FAILURE:
-            JANUS_LOG(LOG_ERR, "Media::Private::play. gst_element_set_state failed\n");
-            break;
-        case GST_STATE_CHANGE_SUCCESS:
-            break;
-        case GST_STATE_CHANGE_ASYNC:
-            break;
-        case GST_STATE_CHANGE_NO_PREROLL:
-            break;
-    }
+    setState(GST_STATE_PLAYING);
 }
 
 void Media::Private::postMessage(const gchar* message)
