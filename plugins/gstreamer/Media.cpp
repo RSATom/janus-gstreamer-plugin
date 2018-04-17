@@ -38,6 +38,8 @@ struct Media::Private
     void pause();
     void play();
 
+    void postMessage(const gchar*);
+
     void onSdp(GstElement* rtspsrc, GstSDPMessage*);
     void rtspSrcPadAdded(GstElement* rtspsrc, GstPad*);
     void rtspNoMorePads(GstElement* rtspsrc);
@@ -153,6 +155,13 @@ void Media::Private::play()
     }
 }
 
+void Media::Private::postMessage(const gchar* message)
+{
+    GstStructure* structure = gst_structure_new_empty(message);
+    GstMessage* gstMessage = gst_message_new_application(NULL, structure);
+    gst_bus_post(busPtr.get(), gstMessage);
+}
+
 void Media::Private::onSdp(GstElement* /*rtspsrc*/,
                            GstSDPMessage* sdp)
 {
@@ -217,10 +226,7 @@ void Media::Private::rtspSrcPadAdded(
 
 void Media::Private::rtspNoMorePads(GstElement* /*rtspsrc*/)
 {
-    GstStructure* structure =
-        gst_structure_new_empty(NO_MORE_PADS_MESSAGE);
-    GstMessage* message = gst_message_new_application(NULL, structure);
-    gst_bus_post(busPtr.get(), message);
+    postMessage(NO_MORE_PADS_MESSAGE);
 }
 
 int Media::Private::sinkIndex(GstAppSink* sink)
