@@ -40,6 +40,7 @@ struct Media::Private
     void prepare();
     void pause();
     void play();
+    void null();
 
     void postMessage(const gchar*);
 
@@ -146,6 +147,11 @@ void Media::Private::pause()
 void Media::Private::play()
 {
     setState(GST_STATE_PLAYING);
+}
+
+void Media::Private::null()
+{
+    setState(GST_STATE_NULL);
 }
 
 void Media::Private::postMessage(const gchar* message)
@@ -345,4 +351,9 @@ void Media::run(
     _p->prepare();
     _p->pause();
     _p->play();
+}
+
+void Media::shutdown()
+{
+    _p->null();
 }

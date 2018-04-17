@@ -27,6 +27,7 @@ public:
     typedef std::function<void (bool error)> EosCallback;
     // OnBufferCallback will be called from a streaming thread
     void run(const PreparedCallback&, const OnBufferCallback&, const EosCallback&);
+    void shutdown();
 
 private:
     struct Private;
