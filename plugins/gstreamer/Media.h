@@ -24,8 +24,9 @@ public:
 
     typedef std::function<void ()> PreparedCallback;
     typedef std::function<void (int stream, const void* data, gsize size)> OnBufferCallback;
+    typedef std::function<void (bool error)> EosCallback;
     // OnBufferCallback will be called from a streaming thread
-    void run(const PreparedCallback&, const OnBufferCallback&);
+    void run(const PreparedCallback&, const OnBufferCallback&, const EosCallback&);
 
 private:
     struct Private;

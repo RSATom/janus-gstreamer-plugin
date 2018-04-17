@@ -24,6 +24,7 @@ struct Media::Private
 
     PreparedCallback preparedCallback;
     OnBufferCallback onBufferCallback;
+    EosCallback eosCallback;
 
     GstElementPtr pipelinePtr;
     GstElement* rtspsrc;
@@ -267,6 +268,8 @@ gboolean Media::Private::onBusMessage(GstBus* bus, GstMessage* msg)
 {
     switch (GST_MESSAGE_TYPE(msg)) {
         case GST_MESSAGE_EOS:
+            if(eosCallback)
+                eosCallback(false);
             break;
         case GST_MESSAGE_ERROR: {
             gchar* debug;
@@ -278,7 +281,11 @@ gboolean Media::Private::onBusMessage(GstBus* bus, GstMessage* msg)
 
             g_free(debug);
             g_error_free(error);
-            break;
+
+            if(eosCallback)
+                eosCallback(true);
+
+           break;
         }
         case GST_MESSAGE_STATE_CHANGED:
             GstState oldState, newState, pendingState;
@@ -328,10 +335,12 @@ unsigned Media::streamsCount() const
 
 void Media::run(
     const PreparedCallback& prepared,
-    const OnBufferCallback& onBuffer)
+    const OnBufferCallback& onBuffer,
+    const EosCallback& eos)
 {
     _p->preparedCallback = prepared;
     _p->onBufferCallback = onBuffer;
+    _p->eosCallback = eos;
 
     _p->prepare();
     _p->pause();

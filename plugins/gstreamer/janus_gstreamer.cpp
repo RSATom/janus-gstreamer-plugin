@@ -297,6 +297,10 @@ static void OnBuffer(
     }
 }
 
+static void OnEos(MountPoint* mountPoint, bool error)
+{
+}
+
 static void MediaPrepared(MountPoint* mountPoint)
 {
     mountPoint->streams.resize(mountPoint->source->streamsCount());
@@ -315,7 +319,8 @@ static void PrepareSource(MountPoint* mountPoint)
     mountPoint->source.reset(new Media(mountPoint->mrl, context.loopPtr.get()));
     mountPoint->source->run(
         std::bind(MediaPrepared, mountPoint),
-        std::bind(OnBuffer, mountPoint, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
+        std::bind(OnBuffer, mountPoint, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+        std::bind(OnEos, mountPoint, std::placeholders::_1)
      );
 }
 
