@@ -20,8 +20,6 @@ struct Media::Private
 {
     std::string mrl;
 
-    GMainLoop* mainLoop;
-
     PreparedCallback preparedCallback;
     OnBufferCallback onBufferCallback;
     EosCallback eosCallback;
@@ -136,7 +134,7 @@ void Media::Private::prepare()
         (GSourceFunc) onBusMessageCallback,
         this, nullptr);
     busWatchId =
-        g_source_attach(busSourcePtr.get(), g_main_loop_get_context(mainLoop));
+        g_source_attach(busSourcePtr.get(), g_main_context_get_thread_default());
 }
 
 void Media::Private::pause()
@@ -314,13 +312,14 @@ gboolean Media::Private::onBusMessage(GstBus* bus, GstMessage* msg)
 }
 
 
-Media::Media(const std::string& mrl, GMainLoop* mainLoop) :
-    _p(new Private{.mrl = mrl, .mainLoop = mainLoop})
+Media::Media(const std::string& mrl) :
+    _p(new Private{.mrl = mrl})
 {
 }
 
 Media::~Media()
 {
+    shutdown();
     _p.reset();
 }
 

@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <jansson.h>
+
 
 struct JsonUnref
 {

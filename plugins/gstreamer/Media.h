@@ -15,7 +15,7 @@ class Media
     Media& operator = (const Media&) = delete;
 
 public:
-    Media(const std::string& mrl, GMainLoop*);
+    Media(const std::string& mrl);
     ~Media();
 
     bool hasSdp() const;
