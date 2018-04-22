@@ -271,6 +271,8 @@ static void HandleStopMessage(
     }
 
     session->watching->stopStream(janusSession);
+    session->watching = nullptr;
+    session->sdpSessionId.reset();
 }
 
 static void HandleDestroyMessage(janus_plugin_session* janusSession)
