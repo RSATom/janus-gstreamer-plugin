@@ -69,16 +69,7 @@ void MountPoint::pushError(
     const std::string& transaction,
     const char* errorText)
 {
-    JANUS_LOG(LOG_ERR, "%s\n", errorText);
-
-    JsonPtr eventPtr(json_object());
-    json_t* event = eventPtr.get();
-
-    json_object_set_new(event, "error", json_string(errorText));
-
-    _janus->push_event(
-        janusSession, _plugin,
-        transaction.c_str(), event, nullptr);
+    PushError(_janus, _plugin, janusSession, transaction, errorText);
 }
 
 void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& transaction)

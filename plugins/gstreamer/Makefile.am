@@ -5,6 +5,7 @@ AM_CXXFLAGS = -I$(JANUS_PATH)/include -I$(JANUS_PATH)/include/janus
 lib_LTLIBRARIES = libjanus_gstreamer.la
 libjanus_gstreamer_la_SOURCES = \
     QueueSource.cpp \
+    Session.cpp \
     Media.cpp \
     MountPoint.cpp \
     janus_gstreamer.cpp
