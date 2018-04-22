@@ -16,3 +16,5 @@ typedef
 
 inline bool operator == (const JanusPluginSessionPtr& x, const janus_plugin_session* y)
     { return x.get() == y; }
+inline bool operator < (const JanusPluginSessionPtr& x, const janus_plugin_session* y)
+    { return x.get() < y; }

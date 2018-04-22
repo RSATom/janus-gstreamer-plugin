@@ -1,6 +1,7 @@
 #include "MountPoint.h"
 
 #include <algorithm>
+#include <cassert>
 
 #include "GlibPtr.h"
 #include "GstPtr.h"
@@ -102,22 +103,19 @@ void MountPoint::onBuffer(
         _modifyListenersGuard.unlock();
 
         for(janus_plugin_session* janusSession: removeListiners) {
-            auto it =
-                std::find(s.listiners.begin(), s.listiners.end(), janusSession);
-            if(it == s.listiners.end()) {
-                g_warn_if_reached();
-                continue;
-            } else if(it == s.listiners.end() -1) {
+            const auto it =
+                std::lower_bound(s.listiners.begin(), s.listiners.end(), janusSession);
+            if(it != s.listiners.end() && *it == janusSession)
                 s.listiners.erase(it);
-            } else {
-                it->reset((s.listiners.end() -1)->release());
-                s.listiners.erase(s.listiners.end() -1);
-            }
         }
 
         for(JanusPluginSessionPtr& janusSessionPtr: addListiners) {
-            s.listiners.emplace_back(std::move(janusSessionPtr));
+            const auto it =
+                std::lower_bound(s.listiners.begin(), s.listiners.end(), janusSessionPtr);
+            if(it == s.listiners.end() || *it != janusSessionPtr)
+                s.listiners.emplace(it, std::move(janusSessionPtr));
         }
+        assert(std::is_sorted(s.listiners.begin(), s.listiners.end()));
     }
 
     for(JanusPluginSessionPtr& janusSession: s.listiners) {
