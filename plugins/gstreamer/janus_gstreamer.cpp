@@ -5,6 +5,7 @@
 #include <map>
 #include <functional>
 #include <algorithm>
+#include <cassert>
 
 #include <gst/gst.h>
 #include <gst/sdp/gstsdpmessage.h>
@@ -226,12 +227,15 @@ static void HandleWatchMessage(
         return;
     }
 
+    assert(!session->sdpSessionId);
+    if(!session->sdpSessionId)
+        session->sdpSessionId.reset(g_strdup_printf("%" PRId64, janus_get_real_time()));
+
     MountPoint& mountPoint = it->second;
     mountPoint.prepareMedia();
 
     mountPoint.addWatcher(janusSession, transaction);
 
-    session->sdpSessionId.reset(g_strdup_printf("%" PRId64, janus_get_real_time()));
     session->watching = &mountPoint;
 }
 
