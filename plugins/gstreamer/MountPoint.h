@@ -11,16 +11,6 @@ extern "C" {
 #include "Media.h"
 
 
-struct Stream
-{
-    std::deque<JanusPluginSessionPtr> addListiners;
-    std::deque<janus_plugin_session*> removeListiners;
-
-    bool modifyListiners;
-
-    std::deque<JanusPluginSessionPtr> listiners;
-};
-
 class MountPoint
 {
 public:
@@ -43,6 +33,21 @@ private:
         std::string transaction;
     };
     friend bool operator == (const Client&, janus_plugin_session*);
+
+    struct ListinerAction
+    {
+        JanusPluginSessionPtr janusSessionPtr;
+        bool add;
+    };
+    friend bool operator < (const ListinerAction&, const ListinerAction&);
+
+    struct Stream
+    {
+        std::deque<ListinerAction> listinersActions;
+        bool actionsAvailable;
+
+        std::deque<JanusPluginSessionPtr> listiners;
+    };
 
     void pushSdp(janus_plugin_session*, const std::string& transaction);
     void mediaPrepared();

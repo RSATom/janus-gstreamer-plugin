@@ -19,6 +19,12 @@ bool operator == (const MountPoint::Client& client, janus_plugin_session* janusS
     return client.janusSessionPtr.get() == janusSession;
 }
 
+bool operator < (const MountPoint::ListinerAction& x, const MountPoint::ListinerAction& y)
+{
+    return x.janusSessionPtr.get() < y.janusSessionPtr.get();
+}
+
+
 MountPoint::MountPoint(janus_callbacks* janus, janus_plugin* plugin, const std::string& mrl) :
     _janus(janus), _plugin(plugin), _mrl(mrl), _prepared(false)
 {
@@ -92,28 +98,35 @@ void MountPoint::onBuffer(
         return;
 
     Stream& s = _streams[stream];
-    if(s.modifyListiners) {
-        std::deque<JanusPluginSessionPtr> addListiners;
-        std::deque<janus_plugin_session*> removeListiners;
+    if(s.actionsAvailable) {
+        std::deque<ListinerAction> listinersActions;
 
         _modifyListenersGuard.lock();
-        addListiners.swap(s.addListiners);
-        removeListiners.swap(s.removeListiners);
-        s.modifyListiners = false;
+        listinersActions.swap(s.listinersActions);
+        s.actionsAvailable = false;
         _modifyListenersGuard.unlock();
 
-        for(janus_plugin_session* janusSession: removeListiners) {
-            const auto it =
-                std::lower_bound(s.listiners.begin(), s.listiners.end(), janusSession);
-            if(it != s.listiners.end() && *it == janusSession)
-                s.listiners.erase(it);
-        }
-
-        for(JanusPluginSessionPtr& janusSessionPtr: addListiners) {
-            const auto it =
-                std::lower_bound(s.listiners.begin(), s.listiners.end(), janusSessionPtr);
-            if(it == s.listiners.end() || *it != janusSessionPtr)
-                s.listiners.emplace(it, std::move(janusSessionPtr));
+        std::stable_sort(listinersActions.begin(), listinersActions.end());
+        for(auto it = listinersActions.begin(); it != listinersActions.end(); ) {
+            auto nextIt = it + 1;
+            if(nextIt != listinersActions.end() &&
+               it->janusSessionPtr == nextIt->janusSessionPtr &&
+               it->add != nextIt->add)
+            {
+                it += 2;
+            } else {
+                janus_plugin_session* janusSession = it->janusSessionPtr.get();
+                const auto listinerIt =
+                    std::lower_bound(s.listiners.begin(), s.listiners.end(), janusSession);
+                if(it->add) {
+                    if(listinerIt == s.listiners.end() || *listinerIt != it->janusSessionPtr)
+                        s.listiners.emplace(listinerIt, std::move(it->janusSessionPtr));
+                } else {
+                    if(listinerIt != s.listiners.end() && *listinerIt == janusSession)
+                        s.listiners.erase(listinerIt);
+                }
+                ++it;
+            }
         }
         assert(std::is_sorted(s.listiners.begin(), s.listiners.end()));
     }
@@ -189,8 +202,9 @@ void MountPoint::startStream(janus_plugin_session* janusSession)
     std::lock_guard<std::mutex> lock(_modifyListenersGuard);
     for(Stream& s: _streams) {
         janus_refcount_increase(&janusSession->ref);
-        s.addListiners.emplace_back(janusSession);
-        s.modifyListiners = true;
+        s.listinersActions.emplace_back(
+            ListinerAction{JanusPluginSessionPtr(janusSession), true});
+        s.actionsAvailable = true;
     }
 }
 
@@ -198,8 +212,10 @@ void MountPoint::stopStream(janus_plugin_session* janusSession)
 {
     std::lock_guard<std::mutex> lock(_modifyListenersGuard);
     for(Stream& s: _streams) {
-        s.removeListiners.push_back(janusSession);
-        s.modifyListiners = true;
+        janus_refcount_increase(&janusSession->ref);
+        s.listinersActions.emplace_back(
+            ListinerAction{JanusPluginSessionPtr(janusSession), false});
+        s.actionsAvailable = true;
     }
 }
 
