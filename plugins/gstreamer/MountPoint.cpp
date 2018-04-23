@@ -11,6 +11,7 @@
 
 enum {
     RECONNECT_TIMEOUT = 5,
+    MAX_RECONNECT_COUNT = 5,
 };
 
 
@@ -26,7 +27,7 @@ bool operator < (const MountPoint::ListinerAction& x, const MountPoint::Listiner
 
 
 MountPoint::MountPoint(janus_callbacks* janus, janus_plugin* plugin, const std::string& mrl) :
-    _janus(janus), _plugin(plugin), _mrl(mrl), _prepared(false)
+    _janus(janus), _plugin(plugin), _mrl(mrl), _reconnectCount(0), _prepared(false)
 {
 }
 
@@ -143,7 +144,27 @@ void MountPoint::onEos(bool error)
     _media->shutdown();
     _media.reset();
 
-    // FIXME! Should notify watcher about a problem?
+    if(_reconnectCount >= MAX_RECONNECT_COUNT - 1) {
+        JANUS_LOG(LOG_ERR,
+            "Max reconnect count is reached\n");
+
+        JsonPtr eventPtr(json_object());
+        json_t* event = eventPtr.get();
+
+        json_object_set_new(event, "error", json_string("fail to start streaming"));
+
+        for(const Client& client: _clients) {
+            _janus->push_event(
+                client.janusSessionPtr.get(), _plugin,
+                client.transaction.c_str(), event, nullptr);
+        }
+
+        _reconnectCount = 0;
+
+        return;
+    }
+
+    ++_reconnectCount;
 
     JANUS_LOG(LOG_INFO,
         "Scheduling reconnect to  \"%s\"\n",

@@ -65,6 +65,7 @@ private:
     std::deque<Client> _clients;
 
     std::unique_ptr<Media> _media;
+    unsigned _reconnectCount;
     std::deque<Stream> _streams;
     bool _prepared;
 
