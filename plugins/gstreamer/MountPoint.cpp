@@ -84,7 +84,7 @@ void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& 
 void MountPoint::mediaPrepared()
 {
     _streams.resize(_media->streamsCount());
-    _prepared = true;
+    _prepared = true; // FIXME! protect from reordering
 
     for(const Client& client: _clients)
         pushSdp(client.janusSessionPtr.get(), client.transaction);
