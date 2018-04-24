@@ -33,6 +33,7 @@ private:
         std::string transaction;
     };
     friend bool operator == (const Client&, janus_plugin_session*);
+    friend bool operator < (const Client&, janus_plugin_session*);
 
     struct ListinerAction
     {

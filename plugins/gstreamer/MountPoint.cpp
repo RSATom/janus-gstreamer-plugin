@@ -20,6 +20,11 @@ bool operator == (const MountPoint::Client& client, janus_plugin_session* janusS
     return client.janusSessionPtr.get() == janusSession;
 }
 
+bool operator < (const MountPoint::Client& client, janus_plugin_session* janusSession)
+{
+    return client.janusSessionPtr.get() < janusSession;
+}
+
 bool operator < (const MountPoint::ListinerAction& x, const MountPoint::ListinerAction& y)
 {
     return x.janusSessionPtr.get() < y.janusSessionPtr.get();
@@ -211,8 +216,15 @@ void MountPoint::addWatcher(
     janus_plugin_session* janusSession,
     const std::string& transaction)
 {
-    janus_refcount_increase(&janusSession->ref);
-    _clients.emplace_back(Client{JanusPluginSessionPtr(janusSession), transaction});
+    const auto clientIt =
+        std::lower_bound(_clients.begin(), _clients.end(), janusSession);
+    if(clientIt == _clients.end() || clientIt->janusSessionPtr.get() != janusSession) {
+        janus_refcount_increase(&janusSession->ref);
+        _clients.emplace(clientIt, Client{JanusPluginSessionPtr(janusSession), transaction});
+    } else {
+        JANUS_LOG(LOG_ERR, "janus session already watching\n");
+        return;
+    }
 
     if(media()->hasSdp())
          pushSdp(janusSession, transaction);
@@ -239,16 +251,18 @@ void MountPoint::stopStream(janus_plugin_session* janusSession)
         s.actionsAvailable = true;
     }
 
-    _clients.erase(
-        std::remove(_clients.begin(), _clients.end(), janusSession),
-        _clients.end());
+    const auto clientIt =
+        std::lower_bound(_clients.begin(), _clients.end(), janusSession);
+    if(clientIt != _clients.end() && *clientIt == janusSession)
+        _clients.erase(clientIt);
 }
 
 void MountPoint::removeWatcher(janus_plugin_session* janusSession)
 {
-    _clients.erase(
-        std::remove(_clients.begin(), _clients.end(), janusSession),
-        _clients.end());
+    const auto clientIt =
+        std::lower_bound(_clients.begin(), _clients.end(), janusSession);
+    if(clientIt != _clients.end() && *clientIt == janusSession)
+        _clients.erase(clientIt);
 
     if(_clients.empty()) {
         if(_media) {
