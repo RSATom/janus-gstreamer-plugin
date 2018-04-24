@@ -251,9 +251,12 @@ void MountPoint::removeWatcher(janus_plugin_session* janusSession)
         _clients.end());
 
     if(_clients.empty()) {
-        _media->shutdown();
-        _media.reset();
-        _streams.clear();
-        _prepared = false;
+        if(_media) {
+            _media->shutdown();
+            _media.reset();
+            _streams.clear();
+            _prepared = false;
+        }
+        assert(_streams.empty() && !_prepared);
     }
 }
