@@ -18,6 +18,8 @@ public:
 
     const std::string& mrl() const;
 
+    bool isUsed() const;
+
     void prepareMedia();
     const Media* media() const;
 

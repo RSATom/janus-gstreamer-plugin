@@ -48,6 +48,11 @@ const std::string& MountPoint::mrl() const
     return _mrl;
 }
 
+bool MountPoint::isUsed() const
+{
+    return !_clients.empty();
+}
+
 void MountPoint::pushError(const char* errorText)
 {
     JANUS_LOG(LOG_ERR, "%s\n", errorText);
