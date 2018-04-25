@@ -25,6 +25,12 @@ bool operator < (const MountPoint::Client& client, janus_plugin_session* janusSe
     return client.janusSessionPtr.get() < janusSession;
 }
 
+bool operator != (const MountPoint::Client& client, janus_plugin_session* janusSession)
+{
+    return client.janusSessionPtr.get() != janusSession;
+}
+
+
 bool operator < (const MountPoint::ListinerAction& x, const MountPoint::ListinerAction& y)
 {
     return x.janusSessionPtr.get() < y.janusSessionPtr.get();

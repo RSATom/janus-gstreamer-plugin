@@ -34,6 +34,7 @@ private:
     };
     friend bool operator == (const Client&, janus_plugin_session*);
     friend bool operator < (const Client&, janus_plugin_session*);
+    friend bool operator != (const MountPoint::Client&, janus_plugin_session*);
 
     struct ListinerAction
     {
