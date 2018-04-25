@@ -41,6 +41,39 @@ const std::string& MountPoint::mrl() const
     return _mrl;
 }
 
+void MountPoint::pushError(const char* errorText)
+{
+    JANUS_LOG(LOG_ERR, "%s\n", errorText);
+
+    JsonPtr eventPtr(json_object());
+    json_t* event = eventPtr.get();
+
+    json_object_set_new(event, "error", json_string(errorText));
+
+    for(const Client& client: _clients) {
+        _janus->push_event(
+            client.janusSessionPtr.get(), _plugin,
+            client.transaction.c_str(), event, nullptr);
+    }
+}
+
+void MountPoint::pushError(
+    janus_plugin_session* janusSession,
+    const std::string& transaction,
+    const char* errorText)
+{
+    JANUS_LOG(LOG_ERR, "%s\n", errorText);
+
+    JsonPtr eventPtr(json_object());
+    json_t* event = eventPtr.get();
+
+    json_object_set_new(event, "error", json_string(errorText));
+
+    _janus->push_event(
+        janusSession, _plugin,
+        transaction.c_str(), event, nullptr);
+}
+
 void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& transaction)
 {
     Session* session = GetSession(janusSession);
@@ -153,16 +186,7 @@ void MountPoint::onEos(bool error)
         JANUS_LOG(LOG_ERR,
             "Max reconnect count is reached\n");
 
-        JsonPtr eventPtr(json_object());
-        json_t* event = eventPtr.get();
-
-        json_object_set_new(event, "error", json_string("fail to start streaming"));
-
-        for(const Client& client: _clients) {
-            _janus->push_event(
-                client.janusSessionPtr.get(), _plugin,
-                client.transaction.c_str(), event, nullptr);
-        }
+        pushError("fail to start streaming");
 
         _reconnectCount = 0;
 

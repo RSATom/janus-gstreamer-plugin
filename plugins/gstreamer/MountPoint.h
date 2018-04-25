@@ -50,6 +50,11 @@ private:
         std::deque<JanusPluginSessionPtr> listiners;
     };
 
+    void pushError(const char* errorText);
+    void pushError(
+        janus_plugin_session* janusSession,
+        const std::string& transaction,
+        const char* errorText);
     void pushSdp(janus_plugin_session*, const std::string& transaction);
     void mediaPrepared();
     void onBuffer(
