@@ -12,6 +12,7 @@
 enum {
     RECONNECT_TIMEOUT = 5,
     MAX_RECONNECT_COUNT = 5,
+    MAX_CLIENTS_COUNT = 5,
 };
 
 
@@ -246,6 +247,11 @@ void MountPoint::addWatcher(
     janus_plugin_session* janusSession,
     const std::string& transaction)
 {
+    if(_clients.size() >= MAX_CLIENTS_COUNT) {
+        pushError(janusSession, transaction, "max clients count reached");
+        return;
+    }
+
     const auto clientIt =
         std::lower_bound(_clients.begin(), _clients.end(), janusSession);
     if(clientIt == _clients.end() || clientIt->janusSessionPtr.get() != janusSession) {
