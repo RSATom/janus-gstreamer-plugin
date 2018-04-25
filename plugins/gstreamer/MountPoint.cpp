@@ -286,8 +286,17 @@ void MountPoint::startStream(
     }
 }
 
-void MountPoint::stopStream(janus_plugin_session* janusSession)
+void MountPoint::stopStream(
+    janus_plugin_session* janusSession,
+    const std::string& transaction)
 {
+    const auto clientIt =
+        std::lower_bound(_clients.begin(), _clients.end(), janusSession);
+    if(clientIt == _clients.end() || *clientIt != janusSession) {
+        pushError(janusSession, transaction, "stop without attach");
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(_modifyListenersGuard);
     for(Stream& s: _streams) {
         janus_refcount_increase(&janusSession->ref);
@@ -296,10 +305,7 @@ void MountPoint::stopStream(janus_plugin_session* janusSession)
         s.actionsAvailable = true;
     }
 
-    const auto clientIt =
-        std::lower_bound(_clients.begin(), _clients.end(), janusSession);
-    if(clientIt != _clients.end() && *clientIt == janusSession)
-        _clients.erase(clientIt);
+    _clients.erase(clientIt);
 }
 
 void MountPoint::removeWatcher(janus_plugin_session* janusSession)

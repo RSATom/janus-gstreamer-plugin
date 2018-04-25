@@ -270,7 +270,7 @@ static void HandleStopMessage(
         return;
     }
 
-    session->watching->stopStream(janusSession);
+    session->watching->stopStream(janusSession, transaction);
     session->watching = nullptr;
     session->sdpSessionId.reset();
 }
