@@ -253,7 +253,7 @@ static void HandleStartMessage(
         return;
     }
 
-    session->watching->startStream(janusSession);
+    session->watching->startStream(janusSession, transaction);
 }
 
 static void HandleStopMessage(

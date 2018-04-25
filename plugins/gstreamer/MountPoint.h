@@ -22,7 +22,7 @@ public:
     const Media* media() const;
 
     void addWatcher(janus_plugin_session*, const std::string& transaction);
-    void startStream(janus_plugin_session*);
+    void startStream(janus_plugin_session*, const std::string& transaction);
     void stopStream(janus_plugin_session*);
     void removeWatcher(janus_plugin_session*);
 

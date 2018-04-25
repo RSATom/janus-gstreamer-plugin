@@ -266,8 +266,17 @@ void MountPoint::addWatcher(
          pushSdp(janusSession, transaction);
 }
 
-void MountPoint::startStream(janus_plugin_session* janusSession)
+void MountPoint::startStream(
+    janus_plugin_session* janusSession,
+    const std::string& transaction)
 {
+    const auto clientIt =
+        std::lower_bound(_clients.begin(), _clients.end(), janusSession);
+    if(clientIt == _clients.end() || *clientIt != janusSession) {
+        pushError(janusSession, transaction, "start without attach");
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(_modifyListenersGuard);
     for(Stream& s: _streams) {
         janus_refcount_increase(&janusSession->ref);
