@@ -314,6 +314,8 @@ void MountPoint::removeWatcher(janus_plugin_session* janusSession)
         std::lower_bound(_clients.begin(), _clients.end(), janusSession);
     if(clientIt != _clients.end() && *clientIt == janusSession)
         _clients.erase(clientIt);
+    else
+        JANUS_LOG(LOG_ERR, "trying to remove not watching session\n");
 
     if(_clients.empty()) {
         if(_media) {
