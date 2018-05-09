@@ -287,10 +287,6 @@ gboolean Media::Private::onBusMessage(GstBus* bus, GstMessage* msg)
 
            break;
         }
-        case GST_MESSAGE_STATE_CHANGED:
-            GstState oldState, newState, pendingState;
-            gst_message_parse_state_changed(msg, &oldState, &newState, &pendingState);
-            break;
         case GST_MESSAGE_APPLICATION: {
             const GstStructure* structure = gst_message_get_structure(msg);
             const gchar* name = gst_structure_get_name(structure);
