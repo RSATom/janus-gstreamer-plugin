@@ -270,7 +270,7 @@ void Media::Private::onAppSinkEos(GstAppSink* /*appsink*/)
 
 gboolean Media::Private::onBusMessage(GstBus* bus, GstMessage* msg)
 {
-    switch (GST_MESSAGE_TYPE(msg)) {
+    switch(GST_MESSAGE_TYPE(msg)) {
         case GST_MESSAGE_EOS:
             if(eosCallback)
                 eosCallback(false);
