@@ -31,7 +31,11 @@ struct Media::Private
 
     GstSDPMessagePtr sdpPtr;
 
-    std::deque<GstAppSink*> rtpSinks;
+    struct Stream {
+        Media::Stream stream;
+        GstAppSink* sink;
+    };
+    std::deque<Stream> streams;
 
     void setState(GstState);
 
@@ -172,6 +176,26 @@ void Media::Private::rtspSrcPadAdded(
     GstElement* /*rtspsrc*/,
     GstPad* pad)
 {
+    GstCapsPtr capsPtr(gst_pad_query_caps(pad, nullptr));
+    GstCaps* caps = capsPtr.get();
+    GCharPtr capsStrPtr(gst_caps_to_string(caps));
+    JANUS_LOG(LOG_VERB, "Stream caps: %s\n", capsStrPtr.get());
+
+    GstStructure* structure = gst_caps_get_structure(caps, 0);
+
+    const gchar* media =
+        gst_structure_get_string(structure, "media");
+
+    StreamType streamType = StreamType::Unknown;
+    if(0 == g_strcmp0(media, "video"))
+        streamType = StreamType::Video;
+    else if(0 == g_strcmp0(media, "audio"))
+        streamType = StreamType::Audio;
+
+    gint payload = -1;
+    gst_structure_get_int(structure, "payload", &payload);
+
+
     GstElement* pipeline = pipelinePtr.get();
 
     GstElementPtr appSinkPtr(gst_element_factory_make("appsink", nullptr));
@@ -214,7 +238,8 @@ void Media::Private::rtspSrcPadAdded(
 
     gst_pad_link(pad, sinkPad);
 
-    rtpSinks.push_back(appSink);
+
+    streams.emplace_back(Stream{{streamType, payload}, appSink});
 }
 
 void Media::Private::rtspNoMorePads(GstElement* /*rtspsrc*/)
@@ -224,11 +249,18 @@ void Media::Private::rtspNoMorePads(GstElement* /*rtspsrc*/)
 
 int Media::Private::sinkIndex(GstAppSink* sink)
 {
-    auto it = std::find(rtpSinks.begin(), rtpSinks.end(), sink);
-    if(it == rtpSinks.end())
+    auto it =
+        std::find_if(
+            streams.begin(), streams.end(),
+                [sink] (const Stream& stream) -> bool {
+                    return sink == stream.sink;
+                }
+            );
+
+    if(it == streams.end())
         return -1;
     else
-        return it - rtpSinks.begin();
+        return it - streams.begin();
 }
 
 GstFlowReturn Media::Private::onAppSinkPreroll(GstAppSink* appsink)
@@ -327,7 +359,18 @@ const GstSDPMessage* Media::sdp() const
 
 unsigned Media::streamsCount() const
 {
-    return _p->rtpSinks.size();
+    return _p->streams.size();
+}
+
+std::vector<Media::Stream> Media::streams() const
+{
+    std::vector<Media::Stream> streams;
+    streams.reserve(_p->streams.size());
+
+    for(Private::Stream& stream: _p->streams)
+        streams.emplace_back(stream.stream);
+
+    return std::move(streams);
 }
 
 void Media::run(

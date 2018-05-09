@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <functional>
+#include <vector>
 
 #include <glib.h>
 
@@ -15,12 +16,25 @@ class Media
     Media& operator = (const Media&) = delete;
 
 public:
+    enum class StreamType {
+        Unknown,
+        Video,
+        Audio
+    };
+
+    struct Stream {
+        StreamType type;
+        int payload;
+    };
+
     Media(const std::string& mrl);
     ~Media();
 
     bool hasSdp() const;
     const GstSDPMessage* sdp() const;
+
     unsigned streamsCount() const;
+    std::vector<Stream> streams() const;
 
     typedef std::function<void ()> PreparedCallback;
     typedef std::function<void (int stream, const void* data, gsize size)> OnBufferCallback;
