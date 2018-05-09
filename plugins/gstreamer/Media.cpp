@@ -129,12 +129,8 @@ void Media::Private::prepare()
     busPtr.reset(gst_pipeline_get_bus(GST_PIPELINE(pipeline)));
     GstBus* bus = busPtr.get();
     GSourcePtr busSourcePtr(gst_bus_create_watch(bus));
-    g_source_set_callback(
-        busSourcePtr.get(),
-        (GSourceFunc) onBusMessageCallback,
-        this, nullptr);
     busWatchId =
-        g_source_attach(busSourcePtr.get(), g_main_context_get_thread_default());
+        gst_bus_add_watch(bus, onBusMessageCallback, this);
 }
 
 void Media::Private::pause()
