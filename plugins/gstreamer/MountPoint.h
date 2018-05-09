@@ -45,8 +45,16 @@ private:
     };
     friend bool operator < (const ListinerAction&, const ListinerAction&);
 
+    enum class RestreamAs {
+        None,
+        Video,
+        Audio,
+    };
+
     struct Stream
     {
+        RestreamAs restreamAs;
+
         std::deque<ListinerAction> listinersActions;
         bool actionsAvailable;
 

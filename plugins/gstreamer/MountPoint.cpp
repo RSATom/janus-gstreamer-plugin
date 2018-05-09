@@ -125,7 +125,24 @@ void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& 
 
 void MountPoint::mediaPrepared()
 {
-    _streams.resize(_media->streamsCount());
+    const std::vector<Media::Stream> streams = _media->streams();
+
+    _streams.resize(streams.size());
+
+    bool videoFound = false, audioFound = false;
+    for(unsigned i = 0; i < streams.size(); ++i) {
+        const Media::Stream& stream = streams[i];
+        if(!videoFound && Media::StreamType::Video == stream.type) {
+            _streams[i].restreamAs = RestreamAs::Video;
+            videoFound = true;
+        } else if(!audioFound && Media::StreamType::Audio == stream.type) {
+            _streams[i].restreamAs = RestreamAs::Audio;
+            audioFound = true;
+        } else {
+            _streams[i].restreamAs = RestreamAs::None;
+        }
+    }
+
     _prepared = true; // FIXME! protect from reordering
 
     for(const Client& client: _clients)
@@ -140,6 +157,7 @@ void MountPoint::onBuffer(
         return;
 
     Stream& s = _streams[stream];
+
     if(s.actionsAvailable) {
         std::deque<ListinerAction> listinersActions;
 
@@ -173,9 +191,12 @@ void MountPoint::onBuffer(
         assert(std::is_sorted(s.listiners.begin(), s.listiners.end()));
     }
 
+    if(RestreamAs::None == s.restreamAs)
+        return;
+
     for(JanusPluginSessionPtr& janusSession: s.listiners) {
         _janus->relay_rtp(
-            janusSession.get(), TRUE,
+            janusSession.get(), RestreamAs::Video == s.restreamAs ? TRUE : FALSE,
             (char*)data, size);
     }
 }
@@ -275,6 +296,9 @@ void MountPoint::startStream(
 
     std::lock_guard<std::mutex> lock(_modifyListenersGuard);
     for(Stream& s: _streams) {
+        if(RestreamAs::None == s.restreamAs)
+            continue;
+
         janus_refcount_increase(&janusSession->ref);
         s.listinersActions.emplace_back(
             ListinerAction{JanusPluginSessionPtr(janusSession), true});
@@ -295,6 +319,9 @@ void MountPoint::stopStream(
 
     std::lock_guard<std::mutex> lock(_modifyListenersGuard);
     for(Stream& s: _streams) {
+        if(RestreamAs::None == s.restreamAs)
+            continue;
+
         janus_refcount_increase(&janusSession->ref);
         s.listinersActions.emplace_back(
             ListinerAction{JanusPluginSessionPtr(janusSession), false});
