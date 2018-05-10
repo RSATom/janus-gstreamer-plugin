@@ -28,7 +28,6 @@ namespace
 
 enum {
     PLUGIN_VERSION = 1,
-    RECONNECT_TIMEOUT = 1,
 };
 
 enum {
