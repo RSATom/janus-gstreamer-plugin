@@ -1,7 +1,6 @@
 #include <memory>
 #include <thread>
 #include <deque>
-#include <mutex>
 #include <map>
 #include <functional>
 #include <algorithm>
@@ -58,7 +57,6 @@ struct PluginContext
     QueueSourcePtr queueSourcePtr;
     std::thread mainThread;
 
-    std::mutex modifyListenersGuard;
     std::map<int, MountPoint> mountPoints;
 };
 
