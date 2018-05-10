@@ -1,9 +1,6 @@
 #include <memory>
 #include <thread>
-#include <deque>
 #include <map>
-#include <functional>
-#include <algorithm>
 #include <cassert>
 
 #include <gst/gst.h>
