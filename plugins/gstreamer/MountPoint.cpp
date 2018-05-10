@@ -38,8 +38,13 @@ bool operator < (const MountPoint::ListinerAction& x, const MountPoint::Listiner
 }
 
 
-MountPoint::MountPoint(janus_callbacks* janus, janus_plugin* plugin, const std::string& mrl) :
-    _janus(janus), _plugin(plugin), _mrl(mrl), _reconnectCount(0), _prepared(false)
+MountPoint::MountPoint(
+    janus_callbacks* janus, janus_plugin* plugin,
+    const std::string& mrl,
+    Flags flags) :
+    _janus(janus), _plugin(plugin),
+    _mrl(mrl), _flags(flags),
+    _reconnectCount(0), _prepared(false)
 {
 }
 
@@ -79,6 +84,9 @@ void MountPoint::pushError(
 
 void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& transaction)
 {
+    const bool restreamVideo = _flags & RESTREAM_VIDEO;
+    const bool restreamAudio = _flags & RESTREAM_AUDIO;
+
     Session* session = GetSession(janusSession);
 
     GstSDPMessage* outSdp;
@@ -95,6 +103,15 @@ void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& 
     const guint mediaCount = gst_sdp_message_medias_len(sourceSdp);
     for(unsigned m = 0; m < mediaCount; ++m) {
         const GstSDPMedia* inMedia = gst_sdp_message_get_media(sourceSdp, m);
+        if(0 == g_strcmp0(inMedia->media, "video")) {
+            if(!restreamVideo)
+                continue;
+        } else if(0 == g_strcmp0(inMedia->media, "audio")) {
+            if(!restreamAudio)
+                continue;
+        } else
+            continue;
+
         GstSDPMedia* outMedia;
         gst_sdp_media_copy(inMedia, &outMedia);
 
@@ -125,6 +142,9 @@ void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& 
 
 void MountPoint::mediaPrepared()
 {
+    const bool restreamVideo = _flags & RESTREAM_VIDEO;
+    const bool restreamAudio = _flags & RESTREAM_AUDIO;
+
     const std::vector<Media::Stream> streams = _media->streams();
 
     _streams.resize(streams.size());
@@ -132,10 +152,10 @@ void MountPoint::mediaPrepared()
     bool videoFound = false, audioFound = false;
     for(unsigned i = 0; i < streams.size(); ++i) {
         const Media::Stream& stream = streams[i];
-        if(!videoFound && Media::StreamType::Video == stream.type) {
+        if(restreamVideo && !videoFound && Media::StreamType::Video == stream.type) {
             _streams[i].restreamAs = RestreamAs::Video;
             videoFound = true;
-        } else if(!audioFound && Media::StreamType::Audio == stream.type) {
+        } else if(restreamAudio && !audioFound && Media::StreamType::Audio == stream.type) {
             _streams[i].restreamAs = RestreamAs::Audio;
             audioFound = true;
         } else {

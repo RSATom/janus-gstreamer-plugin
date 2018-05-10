@@ -14,7 +14,16 @@ extern "C" {
 class MountPoint
 {
 public:
-    MountPoint(janus_callbacks*, janus_plugin*, const std::string& mrl);
+    enum Flags {
+        RESTREAM_VIDEO = 0x1,
+        RESTREAM_AUDIO = 0x2,
+        RESTREAM_BOTH = RESTREAM_VIDEO | RESTREAM_AUDIO,
+    };
+
+    MountPoint(
+        janus_callbacks*, janus_plugin*,
+        const std::string& mrl,
+        Flags);
 
     const std::string& mrl() const;
 
@@ -78,6 +87,8 @@ private:
     janus_plugin *const _plugin;
 
     const std::string _mrl;
+
+    const Flags _flags;
 
     std::deque<Client> _clients;
 

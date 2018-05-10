@@ -391,21 +391,32 @@ static int Init(janus_callbacks* callback, const char* configPath)
         std::make_tuple(1),
         std::make_tuple(
             context.janus, &context.janusPlugin,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars")
+            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars",
+            MountPoint::RESTREAM_BOTH)
         );
     context.mountPoints.emplace(
         std::piecewise_construct,
         std::make_tuple(2),
         std::make_tuple(
             context.janus, &context.janusPlugin,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars")
+            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars",
+            MountPoint::RESTREAM_BOTH)
         );
     context.mountPoints.emplace(
         std::piecewise_construct,
         std::make_tuple(3),
         std::make_tuple(
             context.janus, &context.janusPlugin,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931")
+            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931",
+            MountPoint::RESTREAM_BOTH)
+        );
+    context.mountPoints.emplace(
+        std::piecewise_construct,
+        std::make_tuple(4),
+        std::make_tuple(
+            context.janus, &context.janusPlugin,
+            "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov",
+            MountPoint::RESTREAM_VIDEO)
         );
 
     return 0;
