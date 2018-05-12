@@ -379,7 +379,10 @@ static int Init(janus_callbacks* callback, const char* configPath)
 
     context.janus = callback;
 
-    LoadConfig(context.janus, &context.janusPlugin, configPath, &context.mountPoints);
+    LoadConfig(
+        context.janus, &context.janusPlugin,
+        std::string(configPath) + "/" + PluginPackage + ".jcfg",
+        &context.mountPoints);
 
     InitPluginMain();
 
