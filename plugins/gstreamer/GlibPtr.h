@@ -19,6 +19,9 @@ struct GlibUnref
     void operator() (GSource* source)
         { g_source_unref(source); }
 
+    void operator() (GList* list)
+        { g_list_free(list); }
+
     void operator() (gchar* str)
         { g_free(str); }
 };
@@ -39,6 +42,10 @@ typedef
     std::unique_ptr<
         GSource,
         GlibUnref> GSourcePtr;
+typedef
+    std::unique_ptr<
+        GList,
+        GlibUnref> GListPtr;
 typedef
     std::unique_ptr<
         gchar,
