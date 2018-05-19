@@ -19,7 +19,6 @@ extern "C" {
 #include "GstPtr.h"
 #include "Session.h"
 #include "QueueSource.h"
-#include "Media.h"
 #include "MountPoint.h"
 #include "ConfigLoader.h"
 
