@@ -150,17 +150,17 @@ void MountPoint::mediaPrepared()
     const bool restreamVideo = _flags & RESTREAM_VIDEO;
     const bool restreamAudio = _flags & RESTREAM_AUDIO;
 
-    const std::vector<Media::Stream> streams = _media->streams();
+    const std::vector<RtspMedia::Stream> streams = _media->streams();
 
     _streams.resize(streams.size());
 
     bool videoFound = false, audioFound = false;
     for(unsigned i = 0; i < streams.size(); ++i) {
-        const Media::Stream& stream = streams[i];
-        if(restreamVideo && !videoFound && Media::StreamType::Video == stream.type) {
+        const RtspMedia::Stream& stream = streams[i];
+        if(restreamVideo && !videoFound && RtspMedia::StreamType::Video == stream.type) {
             _streams[i].restreamAs = RestreamAs::Video;
             videoFound = true;
-        } else if(restreamAudio && !audioFound && Media::StreamType::Audio == stream.type) {
+        } else if(restreamAudio && !audioFound && RtspMedia::StreamType::Audio == stream.type) {
             _streams[i].restreamAs = RestreamAs::Audio;
             audioFound = true;
         } else {
@@ -272,7 +272,7 @@ void MountPoint::prepareMedia()
     if(_media)
         return;
 
-    _media.reset(new Media(_mrl));
+    _media.reset(new RtspMedia(_mrl));
     _media->run(
         std::bind(&MountPoint::mediaPrepared, this),
         std::bind(&MountPoint::onBuffer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
@@ -280,7 +280,7 @@ void MountPoint::prepareMedia()
      );
 }
 
-const Media* MountPoint::media() const
+const RtspMedia* MountPoint::media() const
 {
     return _media.get();
 }

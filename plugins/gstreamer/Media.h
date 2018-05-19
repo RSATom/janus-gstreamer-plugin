@@ -6,6 +6,7 @@
 
 #include <glib.h>
 
+#include <gst/gst.h>
 #include <gst/sdp/gstsdpmessage.h>
 
 
@@ -24,14 +25,13 @@ public:
 
     struct Stream {
         StreamType type;
-        int payload;
     };
 
-    Media(const std::string& mrl);
-    ~Media();
+    Media();
+    virtual ~Media();
 
     bool hasSdp() const;
-    const GstSDPMessage* sdp() const;
+    virtual const GstSDPMessage* sdp() const = 0;
 
     unsigned streamsCount() const;
     std::vector<Stream> streams() const;
@@ -41,7 +41,15 @@ public:
     typedef std::function<void (bool error)> EosCallback;
     // OnBufferCallback will be called from a streaming thread
     void run(const PreparedCallback&, const OnBufferCallback&, const EosCallback&);
-    void shutdown();
+    virtual void shutdown() = 0;
+
+protected:
+    virtual void doRun() = 0;
+
+    GstElement* addStream(StreamType);
+
+    void prepared();
+    void eos(bool error);
 
 private:
     struct Private;

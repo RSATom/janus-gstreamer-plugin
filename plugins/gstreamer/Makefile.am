@@ -7,6 +7,7 @@ libjanus_gstreamer_la_SOURCES = \
     QueueSource.cpp \
     Session.cpp \
     Media.cpp \
+    RtspMedia.cpp \
     MountPoint.cpp \
     ConfigLoader.cpp \
     janus_gstreamer.cpp
