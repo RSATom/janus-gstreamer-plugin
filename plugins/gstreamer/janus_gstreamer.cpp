@@ -433,7 +433,7 @@ static struct janus_plugin_result* HandleList()
         json_t* listItem = listItemPtr.get();
 
         json_object_set_new(listItem, "id", json_integer(pair.first));
-        json_object_set_new(listItem, "description", json_string(pair.second.mrl().c_str()));
+        json_object_set_new(listItem, "description", json_string(pair.second.description().c_str()));
         json_object_set_new(listItem, "type", json_string("live"));
         json_array_append_new(list, listItemPtr.release());
     }

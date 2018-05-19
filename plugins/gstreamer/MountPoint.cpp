@@ -48,6 +48,11 @@ MountPoint::MountPoint(
 {
 }
 
+const std::string&  MountPoint::description() const
+{
+    return mrl();
+}
+
 const std::string& MountPoint::mrl() const
 {
     return _mrl;

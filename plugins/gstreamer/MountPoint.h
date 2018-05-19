@@ -25,12 +25,11 @@ public:
         const std::string& mrl,
         Flags);
 
-    const std::string& mrl() const;
+    const std::string& description() const;
 
     bool isUsed() const;
 
     void prepareMedia();
-    const Media* media() const;
 
     void addWatcher(janus_plugin_session*, const std::string& transaction);
     void startStream(janus_plugin_session*, const std::string& transaction);
@@ -69,6 +68,10 @@ private:
 
         std::deque<JanusPluginSessionPtr> listiners;
     };
+
+    const std::string& mrl() const;
+
+    const Media* media() const;
 
     void pushError(const char* errorText);
     void pushError(
