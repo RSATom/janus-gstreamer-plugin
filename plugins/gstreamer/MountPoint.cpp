@@ -7,6 +7,7 @@
 #include "GstPtr.h"
 #include "JsonPtr.h"
 #include "Session.h"
+#include "RtspMedia.h"
 
 
 enum {
@@ -150,17 +151,17 @@ void MountPoint::mediaPrepared()
     const bool restreamVideo = _flags & RESTREAM_VIDEO;
     const bool restreamAudio = _flags & RESTREAM_AUDIO;
 
-    const std::vector<RtspMedia::Stream> streams = _media->streams();
+    const std::vector<Media::Stream> streams = _media->streams();
 
     _streams.resize(streams.size());
 
     bool videoFound = false, audioFound = false;
     for(unsigned i = 0; i < streams.size(); ++i) {
-        const RtspMedia::Stream& stream = streams[i];
-        if(restreamVideo && !videoFound && RtspMedia::StreamType::Video == stream.type) {
+        const Media::Stream& stream = streams[i];
+        if(restreamVideo && !videoFound && Media::StreamType::Video == stream.type) {
             _streams[i].restreamAs = RestreamAs::Video;
             videoFound = true;
-        } else if(restreamAudio && !audioFound && RtspMedia::StreamType::Audio == stream.type) {
+        } else if(restreamAudio && !audioFound && Media::StreamType::Audio == stream.type) {
             _streams[i].restreamAs = RestreamAs::Audio;
             audioFound = true;
         } else {
@@ -246,7 +247,7 @@ void MountPoint::onEos(bool error)
 
     JANUS_LOG(LOG_INFO,
         "Scheduling reconnect to  \"%s\"\n",
-        _mrl.c_str());
+        description().c_str());
     auto reconnect =
          [] (gpointer userData) -> gboolean
     {
@@ -280,7 +281,7 @@ void MountPoint::prepareMedia()
      );
 }
 
-const RtspMedia* MountPoint::media() const
+const Media* MountPoint::media() const
 {
     return _media.get();
 }

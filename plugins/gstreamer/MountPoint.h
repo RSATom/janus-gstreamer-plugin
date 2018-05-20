@@ -8,7 +8,7 @@ extern "C" {
 }
 
 #include "JanusPtr.h"
-#include "RtspMedia.h"
+#include "Media.h"
 
 
 class MountPoint
@@ -71,7 +71,7 @@ private:
 
     const std::string& mrl() const;
 
-    const RtspMedia* media() const;
+    const Media* media() const;
 
     void pushError(const char* errorText);
     void pushError(
@@ -95,7 +95,7 @@ private:
 
     std::deque<Client> _clients;
 
-    std::unique_ptr<RtspMedia> _media;
+    std::unique_ptr<Media> _media;
     unsigned _reconnectCount;
     std::deque<Stream> _streams;
     bool _prepared;
