@@ -298,7 +298,7 @@ void MountPoint::addWatcher(
         return;
     }
 
-    if(media()->hasSdp())
+    if(media() && media()->hasSdp())
          pushSdp(janusSession, transaction);
 }
 
