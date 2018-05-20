@@ -4,7 +4,7 @@ extern "C" {
 #include "janus/utils.h"
 }
 
-#include "MountPoint.h"
+#include "RtspMountPoint.h"
 
 #include "GlibPtr.h"
 
@@ -15,7 +15,7 @@ void LoadConfig(
     janus_callbacks* janus,
     janus_plugin* janusPlugin,
     const std::string& configFile,
-    std::map<int, MountPoint>* mountPoints)
+    std::map<int, std::unique_ptr<MountPoint>>* mountPoints)
 {
 #if USE_CONFIG
     JanusConfigPtr configPtr(janus_config_parse(configFile.c_str()));
@@ -43,24 +43,12 @@ void LoadConfig(
 
         janus_config_item* typeItem =
             janus_config_get(config, stream, janus_config_type_item, "type");
-        janus_config_item* urlItem =
-            janus_config_get(config, stream, janus_config_type_item, "url");
         janus_config_item* videoItem =
             janus_config_get(config, stream, janus_config_type_item, "video");
         janus_config_item* audioItem =
             janus_config_get(config, stream, janus_config_type_item, "audio");
 
         if(!typeItem || !typeItem->value)
-            continue;
-        if(!urlItem || !urlItem->value)
-            continue;
-
-        const std::string type = typeItem->value;
-        if(type != "rtsp")
-            continue;
-
-        const std::string url = urlItem->value;
-        if(url.empty())
             continue;
 
         const bool video =
@@ -78,43 +66,52 @@ void LoadConfig(
         else
             continue;
 
-        mountPoints->emplace(
-            std::piecewise_construct,
-            std::make_tuple(mountPoints->size() + 1),
-            std::make_tuple(
-                janus, janusPlugin,
-                url, flags)
-            );
+        const std::string type = typeItem->value;
+        if(type == "rtsp") {
+            janus_config_item* urlItem =
+                janus_config_get(config, stream, janus_config_type_item, "url");
+
+            if(!urlItem || !urlItem->value)
+                continue;
+
+            const std::string url = urlItem->value;
+            if(url.empty())
+                continue;
+
+            mountPoints->emplace(
+                mountPoints->size() + 1,
+                new RtspMountPoint(
+                    janus, janusPlugin,
+                    url, flags)
+                );
+        } else
+            continue;
     }
 #else
     mountPoints->emplace(
-        std::piecewise_construct,
-        std::make_tuple(1),
-        std::make_tuple(
+        1,
+        new RtspMountPoint(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars",
             MountPoint::RESTREAM_BOTH)
         );
     mountPoints->emplace(
-        std::piecewise_construct,
-        std::make_tuple(2),
-        std::make_tuple(
+        2,
+        new RtspMountPoint(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars",
             MountPoint::RESTREAM_BOTH)
         );
     mountPoints->emplace(
-        std::piecewise_construct,
-        std::make_tuple(3),
-        std::make_tuple(
+        3,
+        new RtspMountPoint(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931",
             MountPoint::RESTREAM_BOTH)
         );
     mountPoints->emplace(
-        std::piecewise_construct,
-        std::make_tuple(4),
-        std::make_tuple(
+        4,
+        std::make_unique<RtspMountPoint>(
             janus, janusPlugin,
             "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov",
             MountPoint::RESTREAM_VIDEO)

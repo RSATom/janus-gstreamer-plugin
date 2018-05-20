@@ -53,7 +53,7 @@ struct PluginContext
     QueueSourcePtr queueSourcePtr;
     std::thread mainThread;
 
-    std::map<int, MountPoint> mountPoints;
+    std::map<int, std::unique_ptr<MountPoint>> mountPoints;
 };
 
 // FIXME! add ability send different meessage structs
@@ -225,12 +225,12 @@ static void HandleWatchMessage(
     if(!session->sdpSessionId)
         session->sdpSessionId.reset(g_strdup_printf("%" PRId64, janus_get_real_time()));
 
-    MountPoint& mountPoint = it->second;
-    mountPoint.prepareMedia();
+    MountPoint* mountPoint = it->second.get();
+    mountPoint->prepareMedia();
 
-    mountPoint.addWatcher(janusSession, transaction);
+    mountPoint->addWatcher(janusSession, transaction);
 
-    session->watching = &mountPoint;
+    session->watching = mountPoint;
 }
 
 static void HandleStartMessage(
@@ -432,7 +432,7 @@ static struct janus_plugin_result* HandleList()
         json_t* listItem = listItemPtr.get();
 
         json_object_set_new(listItem, "id", json_integer(pair.first));
-        json_object_set_new(listItem, "description", json_string(pair.second.description().c_str()));
+        json_object_set_new(listItem, "description", json_string(pair.second->description().c_str()));
         json_object_set_new(listItem, "type", json_string("live"));
         json_array_append_new(list, listItemPtr.release());
     }

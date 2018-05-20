@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <map>
 
 extern "C" {
@@ -13,4 +14,4 @@ void LoadConfig(
     janus_callbacks* janus,
     janus_plugin* janusPlugin,
     const std::string& configFile,
-    std::map<int, MountPoint>* mountPoints);
+    std::map<int, std::unique_ptr<MountPoint>>* mountPoints);

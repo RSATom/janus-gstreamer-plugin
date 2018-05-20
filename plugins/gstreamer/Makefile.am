@@ -9,6 +9,7 @@ libjanus_gstreamer_la_SOURCES = \
     Media.cpp \
     RtspMedia.cpp \
     MountPoint.cpp \
+    RtspMountPoint.cpp \
     ConfigLoader.cpp \
     janus_gstreamer.cpp
 libjanus_gstreamer_la_CXXFLAGS = $(AM_CXXFLAGS) -std=c++14 -Wreturn-type $(GSTREAMER_CFLAGS) $(GSTREAMER_SDP_CFLAGS) $(GSTREAMER_APP_CFLAGS)

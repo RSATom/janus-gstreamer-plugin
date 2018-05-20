@@ -21,9 +21,8 @@ public:
     };
 
     MountPoint(
-        janus_callbacks*, janus_plugin*,
-        const std::string& mrl,
-        Flags);
+        janus_callbacks*, janus_plugin*, Flags,
+        const std::string& description);
 
     const std::string& description() const;
 
@@ -35,6 +34,9 @@ public:
     void startStream(janus_plugin_session*, const std::string& transaction);
     void stopStream(janus_plugin_session*, const std::string& transaction);
     void removeWatcher(janus_plugin_session*);
+
+protected:
+    virtual std::unique_ptr<Media> createMedia() = 0;
 
 private:
     struct Client
@@ -89,7 +91,7 @@ private:
     janus_callbacks *const _janus;
     janus_plugin *const _plugin;
 
-    const std::string _mrl;
+    const std::string _description;
 
     const Flags _flags;
 

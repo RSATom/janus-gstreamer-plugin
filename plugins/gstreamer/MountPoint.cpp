@@ -7,7 +7,6 @@
 #include "GstPtr.h"
 #include "JsonPtr.h"
 #include "Session.h"
-#include "RtspMedia.h"
 
 
 enum {
@@ -41,22 +40,16 @@ bool operator < (const MountPoint::ListinerAction& x, const MountPoint::Listiner
 
 MountPoint::MountPoint(
     janus_callbacks* janus, janus_plugin* plugin,
-    const std::string& mrl,
-    Flags flags) :
+    Flags flags, const std::string& description) :
     _janus(janus), _plugin(plugin),
-    _mrl(mrl), _flags(flags),
+    _flags(flags), _description(description),
     _reconnectCount(0), _prepared(false)
 {
 }
 
 const std::string&  MountPoint::description() const
 {
-    return mrl();
-}
-
-const std::string& MountPoint::mrl() const
-{
-    return _mrl;
+    return _description;
 }
 
 bool MountPoint::isUsed() const
@@ -273,7 +266,7 @@ void MountPoint::prepareMedia()
     if(_media)
         return;
 
-    _media.reset(new RtspMedia(_mrl));
+    _media = createMedia();
     _media->run(
         std::bind(&MountPoint::mediaPrepared, this),
         std::bind(&MountPoint::onBuffer, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
