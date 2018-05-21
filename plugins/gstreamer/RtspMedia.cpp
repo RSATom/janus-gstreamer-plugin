@@ -160,7 +160,7 @@ void RtspMedia::Private::rtspSrcPadAdded(
     GstElement* /*rtspsrc*/,
     GstPad* pad)
 {
-    GstCapsPtr capsPtr(gst_pad_query_caps(pad, nullptr));
+    GstCapsPtr capsPtr(gst_pad_get_current_caps(pad));
     GstCaps* caps = capsPtr.get();
     GCharPtr capsStrPtr(gst_caps_to_string(caps));
     JANUS_LOG(LOG_VERB, "Stream caps: %s\n", capsStrPtr.get());
