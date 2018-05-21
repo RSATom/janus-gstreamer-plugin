@@ -83,6 +83,11 @@ void MountPoint::pushError(
 
 void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& transaction)
 {
+    if(!media() || !media()->hasSdp()) {
+        JANUS_LOG(LOG_ERR, "MountPoint::pushSdp. SDP missing.");
+        return;
+    }
+
     const bool restreamVideo = _flags & RESTREAM_VIDEO;
     const bool restreamAudio = _flags & RESTREAM_AUDIO;
 
