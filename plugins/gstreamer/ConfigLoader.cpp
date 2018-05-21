@@ -5,6 +5,7 @@ extern "C" {
 }
 
 #include "RtspMountPoint.h"
+#include "LaunchMountPoint.h"
 
 #include "GlibPtr.h"
 
@@ -115,6 +116,16 @@ void LoadConfig(
             janus, janusPlugin,
             "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov",
             MountPoint::RESTREAM_VIDEO)
+        );
+    mountPoints->emplace(
+        5,
+        std::make_unique<LaunchMountPoint>(
+            janus, janusPlugin,
+            "videotestsrc pattern=blue ! "
+            "clockoverlay halignment=center valignment=center shaded-background=true font-desc=\"Sans, 36\" ! "
+            "x264enc ! video/x-h264, profile=baseline ! rtph264pay pt=99 config-interval=1 name=videopay",
+            MountPoint::RESTREAM_VIDEO,
+            "Clock")
         );
 #endif
 }

@@ -31,6 +31,8 @@ struct GstUnref
     void operator() (GstSDPMessage* sdp)
         { gst_sdp_message_free(sdp); }
 
+    void operator() (GstSDPMedia* media)
+        { gst_sdp_media_free(media); }
 };
 
 typedef
@@ -61,3 +63,7 @@ typedef
     std::unique_ptr<
         GstSDPMessage,
         GstUnref> GstSDPMessagePtr;
+typedef
+    std::unique_ptr<
+        GstSDPMedia,
+        GstUnref> GstSDPMediaPtr;
