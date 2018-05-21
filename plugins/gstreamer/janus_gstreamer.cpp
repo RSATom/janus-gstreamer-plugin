@@ -226,11 +226,12 @@ static void HandleWatchMessage(
         session->sdpSessionId.reset(g_strdup_printf("%" PRId64, janus_get_real_time()));
 
     MountPoint* mountPoint = it->second.get();
-    mountPoint->prepareMedia();
 
     mountPoint->addWatcher(janusSession, transaction);
 
     session->watching = mountPoint;
+
+    mountPoint->prepareMedia();
 }
 
 static void HandleStartMessage(
