@@ -42,6 +42,8 @@ void LoadConfig(
         janus_config_category* stream =
             static_cast<janus_config_category*>(streamItem->data);
 
+        janus_config_item* descriptionItem =
+            janus_config_get(config, stream, janus_config_type_item, "description");
         janus_config_item* typeItem =
             janus_config_get(config, stream, janus_config_type_item, "type");
         janus_config_item* videoItem =
@@ -51,6 +53,11 @@ void LoadConfig(
 
         if(!typeItem || !typeItem->value)
             continue;
+
+        const std::string description =
+            descriptionItem && descriptionItem->value ?
+                std::string(descriptionItem->value) :
+                std::string();
 
         const bool video =
             !videoItem || !videoItem->value || janus_is_true(videoItem->value);
@@ -83,7 +90,10 @@ void LoadConfig(
                 mountPoints->size() + 1,
                 new RtspMountPoint(
                     janus, janusPlugin,
-                    url, flags)
+                    url,
+                    flags,
+                    description.empty() ? url : description)
+                );
                 );
         } else
             continue;
@@ -94,28 +104,32 @@ void LoadConfig(
         new RtspMountPoint(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars",
-            MountPoint::RESTREAM_BOTH)
+            MountPoint::RESTREAM_BOTH,
+            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars")
         );
     mountPoints->emplace(
         2,
         new RtspMountPoint(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars",
-            MountPoint::RESTREAM_BOTH)
+            MountPoint::RESTREAM_BOTH,
+            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars")
         );
     mountPoints->emplace(
         3,
         new RtspMountPoint(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931",
-            MountPoint::RESTREAM_BOTH)
+            MountPoint::RESTREAM_BOTH,
+            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931")
         );
     mountPoints->emplace(
         4,
         std::make_unique<RtspMountPoint>(
             janus, janusPlugin,
             "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov",
-            MountPoint::RESTREAM_VIDEO)
+            MountPoint::RESTREAM_VIDEO,
+            "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov")
         );
     mountPoints->emplace(
         5,

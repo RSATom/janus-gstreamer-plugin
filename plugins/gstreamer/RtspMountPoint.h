@@ -9,7 +9,8 @@ public:
     RtspMountPoint(
         janus_callbacks*, janus_plugin*,
         const std::string& mrl,
-        Flags);
+        Flags,
+        const std::string& description);
 
 protected:
     std::unique_ptr<Media> createMedia() override;

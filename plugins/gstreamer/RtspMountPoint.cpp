@@ -6,8 +6,9 @@
 RtspMountPoint::RtspMountPoint(
     janus_callbacks* janus, janus_plugin* plugin,
     const std::string& mrl,
-    Flags flags) :
-    MountPoint(janus, plugin, flags, mrl),
+    Flags flags,
+    const std::string& description) :
+    MountPoint(janus, plugin, flags, description),
     _mrl(mrl)
 {
 }
