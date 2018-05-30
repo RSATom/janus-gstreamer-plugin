@@ -94,6 +94,24 @@ void LoadConfig(
                     flags,
                     description.empty() ? url : description)
                 );
+        } else if(type == "launch") {
+            janus_config_item* pipelineItem =
+                janus_config_get(config, stream, janus_config_type_item, "pipeline");
+
+            if(!pipelineItem || !pipelineItem->value)
+                continue;
+
+            const std::string pipeline = pipelineItem->value;
+            if(pipeline.empty())
+                continue;
+
+            mountPoints->emplace(
+                mountPoints->size() + 1,
+                new LaunchMountPoint(
+                    janus, janusPlugin,
+                    pipeline,
+                    flags,
+                    description.empty() ? pipeline : description)
                 );
         } else
             continue;
