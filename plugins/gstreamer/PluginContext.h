@@ -10,6 +10,7 @@ extern "C" {
 #include "GlibPtr.h"
 #include "QueueSource.h"
 #include "MountPoint.h"
+#include "RtspServer.h"
 
 
 struct PluginContext
@@ -23,6 +24,8 @@ struct PluginContext
     std::thread mainThread;
 
     std::map<int, std::unique_ptr<MountPoint>> mountPoints;
+
+    std::unique_ptr<RtspServer> rtspServer;
 };
 
 PluginContext& Context();

@@ -8,6 +8,7 @@
 
 #include <gst/gst.h>
 #include <gst/sdp/gstsdpmessage.h>
+#include <gst/app/gstappsink.h>
 
 
 class Media
@@ -46,6 +47,7 @@ public:
 protected:
     virtual void doRun() = 0;
 
+    void addStream(StreamType streamType, GstAppSink*);
     GstElement* addStream(StreamType);
 
     void prepared();

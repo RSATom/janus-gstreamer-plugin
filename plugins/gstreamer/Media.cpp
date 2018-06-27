@@ -3,9 +3,6 @@
 #include <deque>
 #include <algorithm>
 
-#include <gst/gst.h>
-#include <gst/app/gstappsink.h>
-
 #include "GstPtr.h"
 
 
@@ -121,11 +118,8 @@ void Media::run(
     doRun();
 }
 
-GstElement* Media::addStream(StreamType streamType)
+void Media::addStream(StreamType streamType, GstAppSink* appSink)
 {
-    GstElementPtr appSinkPtr(gst_element_factory_make("appsink", nullptr));
-    GstAppSink* appSink = GST_APP_SINK(appSinkPtr.get());
-
     gst_app_sink_set_drop(appSink, TRUE);
 
     auto onAppSinkEosCallback =
@@ -155,6 +149,17 @@ GstElement* Media::addStream(StreamType streamType)
         nullptr);
 
     _p->streams.emplace_back(Private::Stream{{streamType}, appSink});
+}
+
+GstElement* Media::addStream(StreamType streamType)
+{
+    GstElementPtr appSinkPtr(gst_element_factory_make("appsink", nullptr));
+    GstAppSink* appSink = GST_APP_SINK(appSinkPtr.get());
+
+    if(!appSink)
+        return nullptr;
+
+    addStream(streamType, appSink);
 
     return appSinkPtr.release();
 }

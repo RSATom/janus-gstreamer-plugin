@@ -13,6 +13,7 @@ LT_INIT
 PKG_CHECK_MODULES([GSTREAMER], [gstreamer-1.0])
 PKG_CHECK_MODULES([GSTREAMER_SDP], [gstreamer-sdp-1.0])
 PKG_CHECK_MODULES([GSTREAMER_APP], [gstreamer-app-1.0])
+PKG_CHECK_MODULES([GSTREAMER_RTSP_SERVER], [gstreamer-rtsp-server-1.0])
 
 AC_CONFIG_FILES([Makefile plugins/gstreamer/Makefile])
 AM_SILENT_RULES([yes])

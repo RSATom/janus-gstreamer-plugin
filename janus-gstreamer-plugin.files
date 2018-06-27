@@ -7,6 +7,7 @@ plugins/gstreamer/GlibPtr.h
 plugins/gstreamer/GstPtr.h
 plugins/gstreamer/JsonPtr.h
 plugins/gstreamer/JanusPtr.h
+plugins/gstreamer/GstRtspServerPtr.h
 plugins/gstreamer/Session.h
 plugins/gstreamer/Session.cpp
 plugins/gstreamer/Media.cpp
@@ -29,6 +30,16 @@ plugins/gstreamer/PluginContext.h
 plugins/gstreamer/PluginContext.cpp
 plugins/gstreamer/Request.h
 plugins/gstreamer/Request.cpp
+plugins/gstreamer/RtspServer.h
+plugins/gstreamer/RtspServer.cpp
+plugins/gstreamer/RtspServerProxyMountPoint.h
+plugins/gstreamer/RtspServerProxyMountPoint.cpp
+plugins/gstreamer/RtspServerProxyMedia.h
+plugins/gstreamer/RtspServerProxyMedia.cpp
+plugins/gstreamer/RtspServerMedia.h
+plugins/gstreamer/RtspServerMedia.cpp
+plugins/gstreamer/RtspServerMediaFactory.h
+plugins/gstreamer/RtspServerMediaFactory.cpp
 plugins/gstreamer/PluginMain.h
 plugins/gstreamer/PluginMain.cpp
 plugins/gstreamer/janus_gstreamer.cpp

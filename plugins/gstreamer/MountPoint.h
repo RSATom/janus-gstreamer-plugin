@@ -26,6 +26,8 @@ public:
 
     const std::string& description() const;
 
+    virtual void init() {}
+
     bool isUsed() const;
 
     void prepareMedia();

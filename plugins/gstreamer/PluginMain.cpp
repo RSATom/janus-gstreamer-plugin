@@ -11,6 +11,7 @@ extern "C" {
 #include "PluginContext.h"
 #include "Session.h"
 #include "Request.h"
+#include "RtspServer.h"
 
 
 namespace {
@@ -161,6 +162,12 @@ static void PluginMain()
 
     context.loopPtr.reset(g_main_loop_new(mainContext, FALSE));
     context.queueSourcePtr = QueueSourceNew(mainContext, HandlePluginMessage, nullptr);
+
+    context.rtspServer = std::make_unique<RtspServer>();
+    context.rtspServer->attach();
+
+    for(auto& pair: context.mountPoints)
+        pair.second->init();
 
     GMainLoop* loop = context.loopPtr.get();
 

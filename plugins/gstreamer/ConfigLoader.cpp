@@ -6,6 +6,7 @@ extern "C" {
 
 #include "RtspMountPoint.h"
 #include "LaunchMountPoint.h"
+#include "RtspServerProxyMountPoint.h"
 
 #include "GlibPtr.h"
 
@@ -158,6 +159,14 @@ void LoadConfig(
             "x264enc ! video/x-h264, profile=baseline ! rtph264pay pt=99 config-interval=1 name=videopay",
             MountPoint::RESTREAM_VIDEO,
             "Clock")
+        );
+    mountPoints->emplace(
+        6,
+        std::make_unique<RtspServerProxyMountPoint>(
+            janus, janusPlugin,
+            "/record",
+            MountPoint::RESTREAM_VIDEO,
+            "rtsp record")
         );
 #endif
 }
