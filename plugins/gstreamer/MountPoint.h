@@ -71,8 +71,6 @@ private:
         std::deque<JanusPluginSessionPtr> listiners;
     };
 
-    const std::string& mrl() const;
-
     const Media* media() const;
 
     void pushError(const char* errorText);
