@@ -119,7 +119,7 @@ void LoadConfig(
 #else
     mountPoints->emplace(
         1,
-        new RtspMountPoint(
+        std::make_unique<RtspMountPoint>(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars",
             MountPoint::RESTREAM_BOTH,
@@ -127,7 +127,7 @@ void LoadConfig(
         );
     mountPoints->emplace(
         2,
-        new RtspMountPoint(
+        std::make_unique<RtspMountPoint>(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars",
             MountPoint::RESTREAM_BOTH,
@@ -135,7 +135,7 @@ void LoadConfig(
         );
     mountPoints->emplace(
         3,
-        new RtspMountPoint(
+        std::make_unique<RtspMountPoint>(
             janus, janusPlugin,
             "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931",
             MountPoint::RESTREAM_BOTH,
