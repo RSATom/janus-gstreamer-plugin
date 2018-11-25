@@ -9,7 +9,7 @@ extern "C" {
 
 #include "GlibPtr.h"
 
-// #define USE_CONFIG 1
+#define USE_CONFIG 1
 
 
 void LoadConfig(
