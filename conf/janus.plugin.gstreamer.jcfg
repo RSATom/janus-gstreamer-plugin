@@ -4,18 +4,6 @@ general: {
 streams: (
 	{
 		type = "rtsp"
-		url = "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars"
-	},
-	{
-		type = "rtsp"
-		url = "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars"
-	},
-	{
-		type = "rtsp"
-		url = "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931"
-	},
-	{
-		type = "rtsp"
 		url = "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov"
 		audio = false
 		video = true
