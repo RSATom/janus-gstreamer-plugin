@@ -23,6 +23,7 @@ struct PluginContext
     std::thread mainThread;
 
     std::map<int, std::unique_ptr<MountPoint>> mountPoints;
+    std::map<std::string, std::unique_ptr<MountPoint>> dynamicMountPoints;
 };
 
 PluginContext& Context();

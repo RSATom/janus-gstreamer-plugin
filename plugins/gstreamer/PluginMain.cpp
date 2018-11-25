@@ -11,9 +11,14 @@ extern "C" {
 #include "PluginContext.h"
 #include "Session.h"
 #include "Request.h"
+#include "RtspMountPoint.h"
 
 
 namespace {
+
+enum {
+    MAX_MOUNTPOINTS_COUNT = 5,
+};
 
 // FIXME! add ability send different meessage structs
 struct PluginMessage : public QueueItem
@@ -32,6 +37,10 @@ static void StopWatching(janus_plugin_session* janusSession)
 
     if(session->watching) {
         session->watching->removeWatcher(janusSession);
+
+        if(session->dynamicMountPointWatching)
+            Context().dynamicMountPoints.erase(session->watching->description());
+
         session->watching = nullptr;
         session->sdpSessionId.reset();
     }
@@ -58,23 +67,64 @@ static void HandleWatchMessage(
     if(json_t* jsonId = json_object_get(message.get(), "id"))
         id = json_integer_value(jsonId);
 
-    auto it = context.mountPoints.find(id);
-    if(context.mountPoints.end() == it) {
-        JANUS_LOG(LOG_ERR, "%s: unknown mount point id \"%lld\"\n", GetPluginName(), id);
-        return;
+    std::string mrl;
+    if(json_t* jsonMrl = json_object_get(message.get(), "mrl"))
+        mrl = json_string_value(jsonMrl);
+
+    MountPoint* mountPoint = nullptr;
+    if(id >= 0 ) {
+        session->dynamicMountPointWatching = false;
+
+        auto it = context.mountPoints.find(id);
+        if(context.mountPoints.end() != it) {
+            mountPoint = it->second.get();
+        } else {
+            JANUS_LOG(LOG_ERR, "%s: unknown mount point id \"%lld\"\n", GetPluginName(), id);
+        }
+    } else if(mrl.empty()) {
+        JANUS_LOG(LOG_ERR, "%s: empty mrl\n", GetPluginName());
+        // FIXME! send error event back
+    } else {
+        session->dynamicMountPointWatching = true;
+
+        auto it = context.dynamicMountPoints.find(mrl);
+        if(context.dynamicMountPoints.end() == it) {
+            if(context.dynamicMountPoints.size() < MAX_MOUNTPOINTS_COUNT) {
+                it =
+                    context.dynamicMountPoints.emplace(
+                        std::piecewise_construct,
+                        std::make_tuple(mrl),
+                        std::make_tuple(
+                            new RtspMountPoint(
+                                context.janus, context.janusPlugin.get(),
+                                mrl,
+                                MountPoint::RESTREAM_BOTH,
+                                mrl))
+                        ).first;
+                mountPoint = it->second.get();
+            } else {
+                PushError(
+                    context.janus,
+                    context.janusPlugin.get(),
+                    janusSession,
+                    transaction,
+                    "maximum simultaneous streaming sources count is reached");
+            }
+        } else
+            mountPoint = it->second.get();
     }
 
-    assert(!session->sdpSessionId);
-    if(!session->sdpSessionId)
-        session->sdpSessionId.reset(g_strdup_printf("%" PRId64, janus_get_real_time()));
+    if(mountPoint) {
+        assert(!session->sdpSessionId);
+        if(!session->sdpSessionId)
+            session->sdpSessionId.reset(g_strdup_printf("%" PRId64, janus_get_real_time()));
 
-    MountPoint* mountPoint = it->second.get();
+        mountPoint->addWatcher(janusSession, transaction);
 
-    mountPoint->addWatcher(janusSession, transaction);
+        session->watching = mountPoint;
 
-    session->watching = mountPoint;
-
-    mountPoint->prepareMedia();
+        mountPoint->prepareMedia();
+    }
 }
 
 static void HandleStartMessage(

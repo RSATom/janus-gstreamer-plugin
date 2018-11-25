@@ -8,6 +8,7 @@
 struct Session
 {
     MountPoint* watching;
+    bool dynamicMountPointWatching;
     GCharPtr sdpSessionId;
 };
 
