@@ -351,8 +351,6 @@ void MountPoint::stopStream(
             ListinerAction{JanusPluginSessionPtr(janusSession), false});
         s.actionsAvailable = true;
     }
-
-    _clients.erase(clientIt);
 }
 
 void MountPoint::removeWatcher(janus_plugin_session* janusSession)
