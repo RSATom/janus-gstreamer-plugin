@@ -26,6 +26,17 @@ struct PluginMessage : public QueueItem
 
 }
 
+static void StopWatching(janus_plugin_session* janusSession)
+{
+    Session* session = GetSession(janusSession);
+
+    if(session->watching) {
+        session->watching->removeWatcher(janusSession);
+        session->watching = nullptr;
+        session->sdpSessionId.reset();
+    }
+}
+
 static void HandleWatchMessage(
     janus_plugin_session* janusSession,
     const std::string& transaction,
@@ -35,8 +46,12 @@ static void HandleWatchMessage(
 
     Session* session = GetSession(janusSession);
     if(session->watching) {
-        JANUS_LOG(LOG_ERR, "%s: already watching\n", GetPluginName());
-        return;
+        JANUS_LOG(LOG_INFO,
+            "%s: already watching \"%s\". Detaching...\n",
+            GetPluginName(),
+            session->watching->description().c_str());
+
+        StopWatching(janusSession);
     }
 
     json_int_t id = -1;
@@ -101,11 +116,7 @@ static void HandleDestroyMessage(janus_plugin_session* janusSession)
     Session* session = GetSession(janusSession);
     std::unique_ptr<Session> SessionPtr(session);
 
-    if(session->watching) {
-        session->watching->removeWatcher(janusSession);
-        session->watching = nullptr;
-        session->sdpSessionId.reset();
-    }
+    StopWatching(janusSession);
 
     janusSession->plugin_handle = nullptr;
 }
