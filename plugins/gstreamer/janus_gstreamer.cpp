@@ -151,6 +151,8 @@ static void Destroy()
 {
     JANUS_LOG(LOG_DBG, ">>>> %s: destroy\n", PluginName);
 
+    g_main_loop_quit(Context().loopPtr.get());
+
     Context().mainThread.join();
 }
 
