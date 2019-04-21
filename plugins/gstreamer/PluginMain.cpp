@@ -38,7 +38,7 @@ static void StopWatching(janus_plugin_session* janusSession)
     if(session->watching) {
         session->watching->removeWatcher(janusSession);
 
-        if(session->dynamicMountPointWatching)
+        if(session->dynamicMountPointWatching && !session->watching->isUsed())
             Context().dynamicMountPoints.erase(session->watching->description());
 
         session->watching = nullptr;
