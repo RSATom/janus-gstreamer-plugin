@@ -7,6 +7,3 @@ GStreamer plugin for Janus Gateway
 * `autogen.sh`
 * `./configure --prefix=/path/to/installed/janus`
 * `make && make install`
-
-## Demo
-* http://janus.ipcambox.webchimera.org/
