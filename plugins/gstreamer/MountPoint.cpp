@@ -116,12 +116,48 @@ void MountPoint::pushSdp(janus_plugin_session* janusSession, const std::string& 
         } else
             continue;
 
-        GstSDPMedia* outMedia;
-        gst_sdp_media_copy(inMedia, &outMedia);
+        JANUS_LOG(LOG_VERB, "inMedia: %s\n", gst_sdp_media_as_text(inMedia));
 
-        gst_sdp_media_set_port_info(outMedia, 1, 1); // Have to set port to some non zero value. Why?
+        GstSDPMediaPtr outMediaPtr;
 
-        gst_sdp_message_add_media(outSdp, outMedia);
+        if(0 == g_strcmp0(inMedia->media, "video")) {
+            GstSDPMedia* outMedia;
+            gst_sdp_media_new(&outMedia);
+            outMediaPtr.reset(outMedia);
+
+            gst_sdp_media_set_proto(outMedia, gst_sdp_media_get_proto(inMedia));
+
+            const guint fmtCount = gst_sdp_media_formats_len(inMedia);
+            for(guint fmtIdx = 0; fmtIdx < fmtCount; ++fmtIdx) {
+                const gchar* fmt = gst_sdp_media_get_format(inMedia, fmtIdx);
+                GstCaps* caps = gst_sdp_media_get_caps_from_media(inMedia, atoi(fmt));
+                GstCapsPtr capsPtr(caps);
+                if(caps) {
+                    const guint size = gst_caps_get_size(caps);
+                    for(int i = 0; i < size; ++i) {
+                        GstStructure* structure = gst_caps_get_structure(caps, i);
+                        const gchar* encodingName =
+                            gst_structure_get_string(structure, "encoding-name");
+                        if(0 == g_strcmp0(encodingName, "H264")) {
+                            gst_structure_set(
+                                structure,
+                                "profile-level-id", G_TYPE_STRING, "42c015",
+                                NULL);
+                        }
+                    }
+                    gst_sdp_media_set_media_from_caps(caps, outMedia);
+                }
+            }
+        } else {
+            GstSDPMedia* outMedia;
+            gst_sdp_media_copy(inMedia, &outMedia);
+            outMediaPtr.reset(outMedia);
+        }
+
+        if(outMediaPtr) {
+            gst_sdp_media_set_port_info(outMediaPtr.get(), 1, 1); // Have to set port to some non zero value. Why?
+            gst_sdp_message_add_media(outSdp, outMediaPtr.get());
+        }
     }
 
     GCharPtr sdpPtr(gst_sdp_message_as_text(outSdp));
