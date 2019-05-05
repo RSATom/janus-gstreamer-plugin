@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JanssonPtr.h"
+#include "CxxPtr/JanssonPtr.h"
 
 
 enum class Request

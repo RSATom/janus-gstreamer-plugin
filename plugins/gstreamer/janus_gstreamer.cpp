@@ -11,7 +11,8 @@ extern "C" {
 }
 
 #include "CxxPtr/GstPtr.h"
-#include "JanssonPtr.h"
+#include "CxxPtr/JanssonPtr.h"
+
 #include "Session.h"
 #include "ConfigLoader.h"
 #include "PluginContext.h"

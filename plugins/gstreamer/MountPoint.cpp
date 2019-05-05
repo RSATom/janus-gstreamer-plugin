@@ -5,7 +5,7 @@
 
 #include "CxxPtr/GlibPtr.h"
 #include "CxxPtr/GstPtr.h"
-#include "JanssonPtr.h"
+#include "CxxPtr/JanssonPtr.h"
 #include "Session.h"
 
 

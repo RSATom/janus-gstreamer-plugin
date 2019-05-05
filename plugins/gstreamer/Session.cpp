@@ -1,6 +1,6 @@
 #include "Session.h"
 
-#include "JanssonPtr.h"
+#include "CxxPtr/JanssonPtr.h"
 
 
 void PushError(
