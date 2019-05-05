@@ -7,7 +7,8 @@ extern "C" {
 #include "janus/plugins/plugin.h"
 }
 
-#include "JanusPtr.h"
+#include "CxxPtr/JanusPtr.h"
+
 #include "Media.h"
 
 
