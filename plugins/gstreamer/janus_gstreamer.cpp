@@ -140,6 +140,7 @@ static int Init(janus_callbacks* callback, const char* configPath)
     LoadConfig(
         context.janus, context.janusPlugin.get(),
         std::string(configPath) + "/" + PluginPackage + ".jcfg",
+        &context.config,
         &context.mountPoints);
 
     StartPluginThread();

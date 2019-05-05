@@ -8,6 +8,7 @@ extern "C" {
 }
 
 #include "GlibPtr.h"
+#include "PluginConfig.h"
 #include "QueueSource.h"
 #include "MountPoint.h"
 
@@ -16,6 +17,8 @@ struct PluginContext
 {
     std::unique_ptr<janus_plugin> janusPlugin;
     janus_callbacks* janus;
+
+    PluginConfig config;
 
     GMainContextPtr mainContextPtr;
     GMainLoopPtr loopPtr;

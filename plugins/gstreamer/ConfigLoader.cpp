@@ -4,6 +4,7 @@ extern "C" {
 #include "janus/utils.h"
 }
 
+#include "PluginConfig.h"
 #include "RtspMountPoint.h"
 #include "LaunchMountPoint.h"
 
@@ -16,6 +17,7 @@ void LoadConfig(
     janus_callbacks* janus,
     janus_plugin* janusPlugin,
     const std::string& configFile,
+    PluginConfig* pluginConfig,
     std::map<int, std::unique_ptr<MountPoint>>* mountPoints)
 {
 #if USE_CONFIG
@@ -26,10 +28,18 @@ void LoadConfig(
         return;
     }
 
+
     janus_config_category* general =
         janus_config_get(config, NULL, janus_config_type_category, "general");
 
-    // nothing to load from general atm
+    janus_config_item* enableDynamicMountPointsItem =
+        janus_config_get(config, general, janus_config_type_item, "enable_dynamic_mount_points");
+
+    pluginConfig->enableDynamicMountPoints =
+        enableDynamicMountPointsItem &&
+        enableDynamicMountPointsItem->value &&
+        janus_is_true(enableDynamicMountPointsItem->value);
+
 
     janus_config_array* streamsList =
         janus_config_get(config, NULL, janus_config_type_array, "streams");

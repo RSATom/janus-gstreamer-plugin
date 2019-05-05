@@ -68,8 +68,9 @@ static void HandleWatchMessage(
         id = json_integer_value(jsonId);
 
     std::string mrl;
-    if(json_t* jsonMrl = json_object_get(message.get(), "mrl"))
-        mrl = json_string_value(jsonMrl);
+    if(context.config.enableDynamicMountPoints)
+        if(json_t* jsonMrl = json_object_get(message.get(), "mrl"))
+            mrl = json_string_value(jsonMrl);
 
     MountPoint* mountPoint = nullptr;
     if(id >= 0 ) {
@@ -81,37 +82,39 @@ static void HandleWatchMessage(
         } else {
             JANUS_LOG(LOG_ERR, "%s: unknown mount point id \"%lld\"\n", GetPluginName(), id);
         }
-    } else if(mrl.empty()) {
-        JANUS_LOG(LOG_ERR, "%s: empty mrl\n", GetPluginName());
-        // FIXME! send error event back
-    } else {
-        session->dynamicMountPointWatching = true;
+    } else if(context.config.enableDynamicMountPoints) {
+        if(mrl.empty()) {
+            JANUS_LOG(LOG_ERR, "%s: empty mrl\n", GetPluginName());
+            // FIXME! send error event back
+        } else {
+            session->dynamicMountPointWatching = true;
 
-        auto it = context.dynamicMountPoints.find(mrl);
-        if(context.dynamicMountPoints.end() == it) {
-            if(context.dynamicMountPoints.size() < MAX_MOUNTPOINTS_COUNT) {
-                it =
-                    context.dynamicMountPoints.emplace(
-                        std::piecewise_construct,
-                        std::make_tuple(mrl),
-                        std::make_tuple(
-                            new RtspMountPoint(
-                                context.janus, context.janusPlugin.get(),
-                                mrl,
-                                MountPoint::RESTREAM_BOTH,
-                                mrl))
-                        ).first;
+            auto it = context.dynamicMountPoints.find(mrl);
+            if(context.dynamicMountPoints.end() == it) {
+                if(context.dynamicMountPoints.size() < MAX_MOUNTPOINTS_COUNT) {
+                    it =
+                        context.dynamicMountPoints.emplace(
+                            std::piecewise_construct,
+                            std::make_tuple(mrl),
+                            std::make_tuple(
+                                new RtspMountPoint(
+                                    context.janus, context.janusPlugin.get(),
+                                    mrl,
+                                    MountPoint::RESTREAM_BOTH,
+                                    mrl))
+                            ).first;
+                    mountPoint = it->second.get();
+                } else {
+                    PushError(
+                        context.janus,
+                        context.janusPlugin.get(),
+                        janusSession,
+                        transaction,
+                        "maximum simultaneous streaming sources count is reached");
+                }
+            } else
                 mountPoint = it->second.get();
-            } else {
-                PushError(
-                    context.janus,
-                    context.janusPlugin.get(),
-                    janusSession,
-                    transaction,
-                    "maximum simultaneous streaming sources count is reached");
-            }
-        } else
-            mountPoint = it->second.get();
+        }
     }
 
     if(mountPoint) {
