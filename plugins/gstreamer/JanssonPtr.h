@@ -5,7 +5,7 @@
 #include <jansson.h>
 
 
-struct JsonUnref
+struct JanssonUnref
 {
     void operator() (json_t* json)
         { json_decref(json); }
@@ -14,4 +14,4 @@ struct JsonUnref
 typedef
     std::unique_ptr<
         json_t,
-        JsonUnref> JsonPtr;
+        JanssonUnref> JsonPtr;

@@ -11,7 +11,7 @@ extern "C" {
 }
 
 #include "GstPtr.h"
-#include "JsonPtr.h"
+#include "JanssonPtr.h"
 #include "Session.h"
 #include "ConfigLoader.h"
 #include "PluginContext.h"

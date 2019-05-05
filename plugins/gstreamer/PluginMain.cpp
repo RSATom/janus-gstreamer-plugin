@@ -7,7 +7,7 @@ extern "C" {
 #include "janus/utils.h"
 }
 
-#include "JsonPtr.h"
+#include "JanssonPtr.h"
 #include "PluginContext.h"
 #include "Session.h"
 #include "Request.h"
