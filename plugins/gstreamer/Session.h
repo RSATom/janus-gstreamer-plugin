@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GlibPtr.h"
+#include "CxxPtr/GlibPtr.h"
 
 #include "MountPoint.h"
 

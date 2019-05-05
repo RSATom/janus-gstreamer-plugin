@@ -6,7 +6,7 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
-#include "GstPtr.h"
+#include "CxxPtr/GstPtr.h"
 
 
 struct Media::Private

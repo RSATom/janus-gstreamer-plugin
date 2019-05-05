@@ -7,7 +7,7 @@ extern "C" {
 #include "janus/plugins/plugin.h"
 }
 
-#include "GlibPtr.h"
+#include "CxxPtr/GlibPtr.h"
 #include "PluginConfig.h"
 #include "QueueSource.h"
 #include "MountPoint.h"

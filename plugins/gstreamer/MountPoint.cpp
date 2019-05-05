@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cassert>
 
-#include "GlibPtr.h"
-#include "GstPtr.h"
+#include "CxxPtr/GlibPtr.h"
+#include "CxxPtr/GstPtr.h"
 #include "JanssonPtr.h"
 #include "Session.h"
 

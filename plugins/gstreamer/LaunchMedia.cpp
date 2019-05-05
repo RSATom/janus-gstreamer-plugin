@@ -11,8 +11,8 @@ extern "C" {
 #include "janus/debug.h"
 }
 
-#include "GlibPtr.h"
-#include "GstPtr.h"
+#include "CxxPtr/GlibPtr.h"
+#include "CxxPtr/GstPtr.h"
 
 #define ALL_PADS_PREROLLED_MESSAGE "PADS_PREROLLED"
 

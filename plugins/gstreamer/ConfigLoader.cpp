@@ -8,7 +8,7 @@ extern "C" {
 #include "RtspMountPoint.h"
 #include "LaunchMountPoint.h"
 
-#include "GlibPtr.h"
+#include "CxxPtr/GlibPtr.h"
 
 #define USE_CONFIG 1
 

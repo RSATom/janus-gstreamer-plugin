@@ -8,8 +8,8 @@ extern "C" {
 #include "janus/debug.h"
 }
 
-#include "GlibPtr.h"
-#include "GstPtr.h"
+#include "CxxPtr/GlibPtr.h"
+#include "CxxPtr/GstPtr.h"
 
 #define NO_MORE_PADS_MESSAGE "NO_MORE_PADS"
 

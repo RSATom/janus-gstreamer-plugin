@@ -10,7 +10,7 @@ extern "C" {
 #include "janus/debug.h"
 }
 
-#include "GstPtr.h"
+#include "CxxPtr/GstPtr.h"
 #include "JanssonPtr.h"
 #include "Session.h"
 #include "ConfigLoader.h"
