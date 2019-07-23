@@ -132,7 +132,7 @@ static const char* GetPackage(void)
 
 static int Init(janus_callbacks* callback, const char* configPath)
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: init\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: Init\n", PluginName);
 
     PluginContext& context = Context();
 
@@ -151,7 +151,7 @@ static int Init(janus_callbacks* callback, const char* configPath)
 
 static void Destroy()
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: destroy\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: Destroy\n", PluginName);
 
     g_main_loop_quit(Context().loopPtr.get());
 
@@ -160,7 +160,7 @@ static void Destroy()
 
 static void CreateSession(janus_plugin_session* janusSession, int* error)
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: create_session\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: CreateSession\n", PluginName);
 
     std::unique_ptr<Session> sessionPtr = std::make_unique<Session>();
 
@@ -169,7 +169,7 @@ static void CreateSession(janus_plugin_session* janusSession, int* error)
 
 static void DestroySession(janus_plugin_session* janusSession, int* error)
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: destroy_session\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: DestroySession\n", PluginName);
 
     PostPluginMessage(janusSession, nullptr, nullptr, true);
 }
@@ -278,17 +278,17 @@ struct janus_plugin_result* HandleMessage(
 
 void SetupMedia(janus_plugin_session* /*janusSession*/)
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: setup_media\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: SetupMedia\n", PluginName);
 }
 
 void HangupMedia(janus_plugin_session* /*janusSession*/)
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: hangup_media\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: HangupMedia\n", PluginName);
 }
 
 json_t* QuerySession(janus_plugin_session* /*janusSession*/)
 {
-    JANUS_LOG(LOG_DBG, ">>>> %s: query_session\n", PluginName);
+    JANUS_LOG(LOG_DBG, ">>>> %s: QuerySession\n", PluginName);
 
     return NULL;
 }
