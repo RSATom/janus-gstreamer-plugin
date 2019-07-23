@@ -167,11 +167,18 @@ static void CreateSession(janus_plugin_session* janusSession, int* error)
     janusSession->plugin_handle = sessionPtr.release();
 }
 
+void HangupMedia(janus_plugin_session* janusSession)
+{
+    JANUS_LOG(LOG_DBG, ">>>> %s: HangupMedia\n", PluginName);
+
+    PostHangupMessage(janusSession);
+}
+
 static void DestroySession(janus_plugin_session* janusSession, int* error)
 {
     JANUS_LOG(LOG_DBG, ">>>> %s: DestroySession\n", PluginName);
 
-    PostPluginMessage(janusSession, nullptr, nullptr, true);
+    PostDestroyMessage(janusSession);
 }
 
 static janus_plugin_result* InvalidJson(const char* errorText)
@@ -245,7 +252,7 @@ struct janus_plugin_result* HandleMessage(
     case Request::Watch:
         JANUS_LOG(LOG_DBG, "%s: Request::Watch\n", PluginName);
 
-        PostPluginMessage(janusSession, transaction, message, false);
+        PostClientMessage(janusSession, transaction, message);
 
         return
             janus_plugin_result_new(
@@ -253,7 +260,7 @@ struct janus_plugin_result* HandleMessage(
     case Request::Start: {
         JANUS_LOG(LOG_DBG, "%s: Request::Start\n", PluginName);
 
-        PostPluginMessage(janusSession, transaction, message, false);
+        PostClientMessage(janusSession, transaction, message);
 
         return
             janus_plugin_result_new(
@@ -262,7 +269,7 @@ struct janus_plugin_result* HandleMessage(
     case Request::Stop: {
         JANUS_LOG(LOG_DBG, "%s: Request::Stop\n", PluginName);
 
-        PostPluginMessage(janusSession, transaction, message, false);
+        PostClientMessage(janusSession, transaction, message);
 
         return
             janus_plugin_result_new(
@@ -279,11 +286,6 @@ struct janus_plugin_result* HandleMessage(
 void SetupMedia(janus_plugin_session* /*janusSession*/)
 {
     JANUS_LOG(LOG_DBG, ">>>> %s: SetupMedia\n", PluginName);
-}
-
-void HangupMedia(janus_plugin_session* /*janusSession*/)
-{
-    JANUS_LOG(LOG_DBG, ">>>> %s: HangupMedia\n", PluginName);
 }
 
 json_t* QuerySession(janus_plugin_session* /*janusSession*/)

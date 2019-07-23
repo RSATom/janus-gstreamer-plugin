@@ -21,13 +21,30 @@ enum {
     MAX_MOUNTPOINTS_COUNT = 5,
 };
 
-// FIXME! add ability send different meessage structs
 struct PluginMessage : public QueueItem
 {
+    enum class Origin
+    {
+        Janus,
+        Client,
+    } origin;
+
     JanusPluginSessionPtr janusSessionPtr;
+};
+
+struct ClientMessage : public PluginMessage
+{
     std::string transaction;
     JsonPtr json;
-    bool destroy;
+};
+
+struct JanusMessage : public PluginMessage
+{
+    enum class Type
+    {
+        Hangup,
+        Destroy,
+    } type;
 };
 
 }
@@ -165,25 +182,8 @@ static void HandleStopMessage(
     session->watching->stopStream(janusSession, transaction);
 }
 
-static void HandleDestroyMessage(janus_plugin_session* janusSession)
+static void HandleClientMessage(const ClientMessage& message)
 {
-    Session* session = GetSession(janusSession);
-    std::unique_ptr<Session> SessionPtr(session);
-
-    StopWatching(janusSession);
-
-    janusSession->plugin_handle = nullptr;
-}
-
-static void HandlePluginMessage(const std::unique_ptr<QueueItem>& item, gpointer /*userData*/)
-{
-    PluginMessage& message = static_cast<PluginMessage&>(*item);
-
-    if(message.janusSessionPtr && message.destroy) {
-        HandleDestroyMessage(message.janusSessionPtr.get());
-        return;
-    }
-
     const Request request = ParseRequest(message.json);
     switch(request) {
     case Request::Watch:
@@ -206,6 +206,48 @@ static void HandlePluginMessage(const std::unique_ptr<QueueItem>& item, gpointer
         break;
     default:
         JANUS_LOG(LOG_ERR, "%s: HandlePluginMessage. Unknown request\n", GetPluginName());
+        break;
+    }
+}
+
+static void HandleHangupMessage(janus_plugin_session* janusSession)
+{
+    Session* session = GetSession(janusSession);
+    std::unique_ptr<Session> SessionPtr(session);
+}
+
+static void HandleDestroyMessage(janus_plugin_session* janusSession)
+{
+    Session* session = GetSession(janusSession);
+    std::unique_ptr<Session> SessionPtr(session);
+
+    StopWatching(janusSession);
+
+    janusSession->plugin_handle = nullptr;
+}
+
+static void HandleJanusMessage(const JanusMessage& message)
+{
+    switch(message.type) {
+    case JanusMessage::Type::Hangup:
+        HandleHangupMessage(message.janusSessionPtr.get());
+        break;
+    case JanusMessage::Type::Destroy:
+        HandleDestroyMessage(message.janusSessionPtr.get());
+        break;
+    }
+}
+
+
+static void HandlePluginMessage(const std::unique_ptr<QueueItem>& item, gpointer /*userData*/)
+{
+    const PluginMessage& message = *static_cast<PluginMessage*>(item.get());
+    switch(message.origin) {
+    case PluginMessage::Origin::Janus:
+        HandleJanusMessage(static_cast<const JanusMessage&>(message));
+        break;
+    case PluginMessage::Origin::Client:
+        HandleClientMessage(static_cast<const ClientMessage&>(message));
         break;
     }
 }
@@ -243,22 +285,41 @@ void StartPluginThread()
     context.mainThread = std::thread(PluginMain);
 }
 
-void PostPluginMessage(
+void PostClientMessage(
     janus_plugin_session* janusSession,
     char* transaction,
-    json_t* message,
-    bool destroy)
+    json_t* message)
 {
-    std::unique_ptr<PluginMessage> pluginMessagePtr = std::make_unique<PluginMessage>();
+    std::unique_ptr<ClientMessage> pluginMessagePtr = std::make_unique<ClientMessage>();
     janus_refcount_increase(&janusSession->ref);
     pluginMessagePtr->janusSessionPtr.reset(janusSession);
+    pluginMessagePtr->origin = PluginMessage::Origin::Client;
     if(transaction)
         pluginMessagePtr->transaction = transaction;
     if(message)
         pluginMessagePtr->json.reset(json_incref(message));
-    pluginMessagePtr->destroy = destroy;
 
     QueueSourcePush(
         Context().queueSourcePtr,
         pluginMessagePtr.release());
+}
+
+void PostHangupMessage(
+    janus_plugin_session* janusSession)
+{
+    std::unique_ptr<JanusMessage> janusMessagePtr = std::make_unique<JanusMessage>();
+    janus_refcount_increase(&janusSession->ref);
+    janusMessagePtr->janusSessionPtr.reset(janusSession);
+    janusMessagePtr->origin = PluginMessage::Origin::Janus;
+    janusMessagePtr->type = JanusMessage::Type::Hangup;
+}
+
+void PostDestroyMessage(
+    janus_plugin_session* janusSession)
+{
+    std::unique_ptr<JanusMessage> janusMessagePtr = std::make_unique<JanusMessage>();
+    janus_refcount_increase(&janusSession->ref);
+    janusMessagePtr->janusSessionPtr.reset(janusSession);
+    janusMessagePtr->origin = PluginMessage::Origin::Janus;
+    janusMessagePtr->type = JanusMessage::Type::Destroy;
 }

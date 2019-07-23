@@ -7,8 +7,13 @@ extern "C" {
 
 void StartPluginThread();
 
-void PostPluginMessage(
-    janus_plugin_session* janusSession,
+void PostClientMessage(
+    janus_plugin_session*,
     char* transaction,
-    json_t* message,
-    bool destroy);
+    json_t* message);
+
+void PostHangupMessage(
+    janus_plugin_session*);
+
+void PostDestroyMessage(
+    janus_plugin_session*);
