@@ -30,7 +30,7 @@ Request ParseRequest(const json_t* message)
     }
 }
 
-Request ParseRequest(JsonPtr& message)
+Request ParseRequest(const JsonPtr& message)
 {
     return ParseRequest(message.get());
 }
