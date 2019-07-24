@@ -366,14 +366,11 @@ void MountPoint::startStream(
     }
 }
 
-void MountPoint::stopStream(
-    janus_plugin_session* janusSession,
-    const std::string& transaction)
+void MountPoint::stopStream(janus_plugin_session* janusSession)
 {
     const auto clientIt =
         std::lower_bound(_clients.begin(), _clients.end(), janusSession);
     if(clientIt == _clients.end() || *clientIt != janusSession) {
-        pushError(janusSession, transaction, "stop without attach");
         return;
     }
 

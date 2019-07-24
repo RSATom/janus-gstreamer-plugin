@@ -54,6 +54,8 @@ static void StopWatching(janus_plugin_session* janusSession)
     Session* session = GetSession(janusSession);
 
     if(session->watching) {
+        session->watching->stopStream(janusSession);
+
         session->watching->removeWatcher(janusSession);
 
         if(session->dynamicMountPointWatching && !session->watching->isUsed())
@@ -61,6 +63,8 @@ static void StopWatching(janus_plugin_session* janusSession)
 
         session->watching = nullptr;
         session->sdpSessionId.reset();
+
+        Context().janus->close_pc(janusSession);
     }
 }
 
@@ -71,68 +75,122 @@ static void HandleWatchMessage(
 {
     PluginContext& context = Context();
 
-    Session* session = GetSession(janusSession);
-    if(session->watching) {
-        JANUS_LOG(LOG_INFO,
-            "%s: already watching \"%s\". Detaching...\n",
-            GetPluginName(),
-            session->watching->description().c_str());
-
-        StopWatching(janusSession);
-    }
+    MountPoint* mountPoint = nullptr;
 
     json_int_t id = -1;
-    if(json_t* jsonId = json_object_get(message.get(), "id"))
+    if(json_t* jsonId = json_object_get(message.get(), "id")) {
         id = json_integer_value(jsonId);
-
-    std::string mrl;
-    if(context.config.enableDynamicMountPoints)
-        if(json_t* jsonMrl = json_object_get(message.get(), "mrl"))
-            mrl = json_string_value(jsonMrl);
-
-    MountPoint* mountPoint = nullptr;
-    if(id >= 0 ) {
-        session->dynamicMountPointWatching = false;
 
         auto it = context.mountPoints.find(id);
         if(context.mountPoints.end() != it) {
             mountPoint = it->second.get();
         } else {
             JANUS_LOG(LOG_ERR, "%s: unknown mount point id \"%lld\"\n", GetPluginName(), id);
-        }
-    } else if(context.config.enableDynamicMountPoints) {
-        if(mrl.empty()) {
-            JANUS_LOG(LOG_ERR, "%s: empty mrl\n", GetPluginName());
-            // FIXME! send error event back
-        } else {
-            session->dynamicMountPointWatching = true;
+            PushError(
+                context.janus,
+                context.janusPlugin.get(),
+                janusSession,
+                transaction,
+                "unknown mount point id");
 
-            auto it = context.dynamicMountPoints.find(mrl);
-            if(context.dynamicMountPoints.end() == it) {
-                if(context.dynamicMountPoints.size() < MAX_MOUNTPOINTS_COUNT) {
-                    it =
-                        context.dynamicMountPoints.emplace(
-                            std::piecewise_construct,
-                            std::make_tuple(mrl),
-                            std::make_tuple(
-                                new RtspMountPoint(
-                                    context.janus, context.janusPlugin.get(),
-                                    mrl,
-                                    MountPoint::RESTREAM_BOTH,
-                                    mrl))
-                            ).first;
-                    mountPoint = it->second.get();
-                } else {
-                    PushError(
-                        context.janus,
-                        context.janusPlugin.get(),
-                        janusSession,
-                        transaction,
-                        "maximum simultaneous streaming sources count is reached");
-                }
-            } else
-                mountPoint = it->second.get();
+            return;
         }
+    }
+
+    std::string mrl;
+    if(id < 0 && context.config.enableDynamicMountPoints) {
+        if(json_t* jsonMrl = json_object_get(message.get(), "mrl")) {
+            mrl = json_string_value(jsonMrl);
+            if(mrl.empty()) {
+                JANUS_LOG(LOG_ERR, "%s: empty mrl\n", GetPluginName());
+                PushError(
+                    context.janus,
+                    context.janusPlugin.get(),
+                    janusSession,
+                    transaction,
+                    "empty mrl");
+
+                return;
+            }
+        }
+    }
+
+    if(id < 0 && mrl.empty()) {
+        if(context.config.enableDynamicMountPoints) {
+            JANUS_LOG(LOG_ERR, "%s: missing mount point id and mrl\n", GetPluginName());
+            PushError(
+                context.janus,
+                context.janusPlugin.get(),
+                janusSession,
+                transaction,
+                "missing mount point id and mrl");
+        } else {
+            JANUS_LOG(LOG_ERR, "%s: missing mount point id\n", GetPluginName());
+            PushError(
+                context.janus,
+                context.janusPlugin.get(),
+                janusSession,
+                transaction,
+                "missing mount point id");
+        }
+
+        return;
+    }
+
+    Session* session = GetSession(janusSession);
+    if(session->watching) {
+        if((id >= 0 && session->watching != mountPoint) ||
+           (context.config.enableDynamicMountPoints && session->watching->description() != mrl))
+        {
+            JANUS_LOG(LOG_ERR,
+                "%s: already watching \"%s\".\n",
+                GetPluginName(),
+                session->watching->description().c_str());
+            PushError(
+                context.janus,
+                context.janusPlugin.get(),
+                janusSession,
+                transaction,
+                "already watching");
+        }
+
+        return;
+    }
+
+    if(id >= 0) {
+        assert(mountPoint);
+        session->dynamicMountPointWatching = false;
+    } else if(context.config.enableDynamicMountPoints) {
+        assert(!mrl.empty());
+        session->dynamicMountPointWatching = true;
+
+        auto it = context.dynamicMountPoints.find(mrl);
+        if(context.dynamicMountPoints.end() == it) {
+            if(context.dynamicMountPoints.size() < MAX_MOUNTPOINTS_COUNT) {
+                it =
+                    context.dynamicMountPoints.emplace(
+                        std::piecewise_construct,
+                        std::make_tuple(mrl),
+                        std::make_tuple(
+                            new RtspMountPoint(
+                                context.janus, context.janusPlugin.get(),
+                                mrl,
+                                MountPoint::RESTREAM_BOTH,
+                                mrl))
+                        ).first;
+                mountPoint = it->second.get();
+            } else {
+                PushError(
+                    context.janus,
+                    context.janusPlugin.get(),
+                    janusSession,
+                    transaction,
+                    "maximum simultaneous streaming sources count is reached");
+
+                return;
+            }
+        } else
+            mountPoint = it->second.get();
     }
 
     if(mountPoint) {
@@ -179,7 +237,7 @@ static void HandleStopMessage(
         return;
     }
 
-    session->watching->stopStream(janusSession, transaction);
+    StopWatching(janusSession);
 }
 
 static void HandleClientMessage(const ClientMessage& message)
