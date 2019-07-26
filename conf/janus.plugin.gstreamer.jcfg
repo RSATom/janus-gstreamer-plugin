@@ -15,17 +15,5 @@ streams: (
 			"videotestsrc pattern=blue ! "
 			"clockoverlay halignment=center valignment=center shaded-background=true font-desc=\"Sans, 36\" ! "
 			"x264enc ! video/x-h264, profile=baseline ! rtph264pay pt=99 config-interval=1 name=videopay",
-	},
-	{
-		type = "rtsp"
-		url = "rtsps://ipcambox.webchimera.org:8100/bars"
-		audio = false
-		video = true
-	},
-	{
-		type = "rtsp"
-		url = "rtsps://ipcambox.webchimera.org:8100/dlink931"
-		audio = false
-		video = true
 	}
 )
