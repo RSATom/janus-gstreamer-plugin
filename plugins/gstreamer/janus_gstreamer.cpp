@@ -82,6 +82,7 @@ extern "C" janus_plugin* create()
 
             .create_session        = CreateSession,
             .handle_message        = HandleMessage,
+            .handle_admin_message  = nullptr,
             .setup_media           = SetupMedia,
             .incoming_rtp          = nullptr,
             .incoming_rtcp         = nullptr,
