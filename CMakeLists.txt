@@ -23,6 +23,8 @@ file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     plugins/gstreamer/[^.]*.cpp
     plugins/gstreamer/[^.]*.h
     plugins/gstreamer/[^.]*.cmake
+    snap/snapcraft.yaml
+    snap/hooks/install
     [^.]*.cmake)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
