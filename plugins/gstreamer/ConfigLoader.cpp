@@ -10,8 +10,6 @@ extern "C" {
 
 #include "CxxPtr/GlibPtr.h"
 
-#define USE_CONFIG 1
-
 
 void LoadConfig(
     janus_callbacks* janus,
@@ -20,7 +18,6 @@ void LoadConfig(
     PluginConfig* pluginConfig,
     std::map<int, std::unique_ptr<MountPoint>>* mountPoints)
 {
-#if USE_CONFIG
     JanusConfigPtr configPtr(janus_config_parse(configFile.c_str()));
     janus_config* config = configPtr.get();
     if(!config) {
@@ -126,48 +123,4 @@ void LoadConfig(
         } else
             continue;
     }
-#else
-    mountPoints->emplace(
-        1,
-        std::make_unique<RtspMountPoint>(
-            janus, janusPlugin,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars",
-            MountPoint::RESTREAM_BOTH,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8090/bars")
-        );
-    mountPoints->emplace(
-        2,
-        std::make_unique<RtspMountPoint>(
-            janus, janusPlugin,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars",
-            MountPoint::RESTREAM_BOTH,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/bars")
-        );
-    mountPoints->emplace(
-        3,
-        std::make_unique<RtspMountPoint>(
-            janus, janusPlugin,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931",
-            MountPoint::RESTREAM_BOTH,
-            "rtsp://restream-basic.eastasia.cloudapp.azure.com:8100/dlink931")
-        );
-    mountPoints->emplace(
-        4,
-        std::make_unique<RtspMountPoint>(
-            janus, janusPlugin,
-            "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov",
-            MountPoint::RESTREAM_VIDEO,
-            "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov")
-        );
-    mountPoints->emplace(
-        5,
-        std::make_unique<LaunchMountPoint>(
-            janus, janusPlugin,
-            "videotestsrc pattern=blue ! "
-            "clockoverlay halignment=center valignment=center shaded-background=true font-desc=\"Sans, 36\" ! "
-            "x264enc ! video/x-h264, profile=baseline ! rtph264pay pt=99 config-interval=1 name=videopay",
-            MountPoint::RESTREAM_VIDEO,
-            "Clock")
-        );
-#endif
 }
