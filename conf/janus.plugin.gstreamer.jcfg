@@ -1,4 +1,5 @@
 general: {
+	#enable_dynamic_mount_points = false
 }
 
 streams: (
