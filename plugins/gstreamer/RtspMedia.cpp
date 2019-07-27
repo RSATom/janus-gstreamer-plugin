@@ -72,6 +72,10 @@ void RtspMedia::Private::prepare()
 
     GstElementPtr rtspsrcPtr(gst_element_factory_make("rtspsrc", nullptr));
     rtspsrc = rtspsrcPtr.get();
+    if(!rtspsrc) {
+        JANUS_LOG(LOG_ERR, "RtspMedia::Private::prepare. Fail create rtspsrc element\n");
+        return;
+    }
 
     auto onSdpCallback =
         (void (*)(GstElement*, GstSDPMessage*, gpointer))
