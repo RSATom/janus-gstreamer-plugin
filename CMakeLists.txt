@@ -22,10 +22,9 @@ endif()
 file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     plugins/gstreamer/[^.]*.cpp
     plugins/gstreamer/[^.]*.h
-    plugins/gstreamer/[^.]*.cmake
     snap/snapcraft.yaml
     snap/hooks/install
-    [^.]*.cmake)
+    README.md)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
