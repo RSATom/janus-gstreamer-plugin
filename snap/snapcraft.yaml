@@ -1,0 +1,52 @@
+name: janus-plus-gstreamer-plugin
+base: core18
+version: git
+summary: Janus Gateway with GStreamer plugin
+description: |
+  Janus Gateway with embedded GStreamer streaming plugin.
+license: GPL-3.0
+grade: devel
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: i386
+  - build-on: armhf
+
+layout:
+  /opt/janus/etc/janus:
+    bind: $SNAP_COMMON/etc
+  /opt/janus/share/janus/recordings:
+    bind: $SNAP_COMMON/share/recordings
+  /opt/janus/share/janus/demos/voicemail:
+    bind: $SNAP_COMMON/share/voicemail
+  /opt/janus/lib/janus:
+    bind: $SNAP/opt/janus/lib/janus
+  /opt/janus/share/janus/streams:
+    bind: $SNAP/opt/janus/share/janus/streams
+
+parts:
+  plugin:
+    plugin: cmake
+    source: https://github.com/RSATom/janus-gstreamer-plugin.git
+    build-snaps:
+      - janus-gateway
+    build-packages:
+      - g++
+      - make
+      - libgstreamer1.0-dev
+      - libgstreamer-plugins-base1.0-dev
+      - libjansson-dev
+    stage-snaps:
+      - janus-gateway
+    stage-packages:
+      - libgstreamer1.0-0
+      - gstreamer1.0-plugins-base
+
+apps:
+  janus-gateway:
+    command: opt/janus/bin/janus -o
+    daemon: simple
+    plugs:
+      - network-bind
+      - network
