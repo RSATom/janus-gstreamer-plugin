@@ -26,6 +26,8 @@ layout:
     bind: $SNAP/opt/janus/share/janus/streams
 
 environment:
+  GST_DEBUG: 3
+  GST_DEBUG_NO_COLOR: 1
   GST_PLUGIN_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gstreamer-1.0
   GST_PLUGIN_SYSTEM_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gstreamer-1.0
   GST_PLUGIN_SCANNER: $SNAP/usr/libexec/$SNAPCRAFT_ARCH_TRIPLET/gstreamer-1.0/gst-plugin-scanner
