@@ -17,10 +17,6 @@ extern "C" {
 
 namespace {
 
-enum {
-    MAX_MOUNTPOINTS_COUNT = 5,
-};
-
 struct PluginMessage : public QueueItem
 {
     enum class Origin
@@ -166,7 +162,7 @@ static void HandleWatchMessage(
 
         auto it = context.dynamicMountPoints.find(mrl);
         if(context.dynamicMountPoints.end() == it) {
-            if(context.dynamicMountPoints.size() < MAX_MOUNTPOINTS_COUNT) {
+            if(context.dynamicMountPoints.size() < context.config.maxDynamicMountPoints) {
                 it =
                     context.dynamicMountPoints.emplace(
                         std::piecewise_construct,
@@ -180,6 +176,9 @@ static void HandleWatchMessage(
                         ).first;
                 mountPoint = it->second.get();
             } else {
+                JANUS_LOG(LOG_ERR,
+                    "Maximum simultaneous streaming sources count (%u) is reached.\n",
+                    context.config.maxDynamicMountPoints);
                 PushError(
                     context.janus,
                     context.janusPlugin.get(),

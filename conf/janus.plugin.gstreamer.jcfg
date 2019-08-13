@@ -1,5 +1,6 @@
 general: {
 	#enable_dynamic_mount_points = false
+	#max_dynamic_mount_points = 10
 }
 
 streams: (

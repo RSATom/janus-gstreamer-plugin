@@ -37,6 +37,17 @@ void LoadConfig(
         enableDynamicMountPointsItem->value &&
         janus_is_true(enableDynamicMountPointsItem->value);
 
+    janus_config_item* maxDynamicMountPointsItem =
+        janus_config_get(config, general, janus_config_type_item, "max_dynamic_mount_points");
+
+    if(maxDynamicMountPointsItem && maxDynamicMountPointsItem->value) {
+        const int maxDynamicMountPoints =
+            atoi(enableDynamicMountPointsItem->value);
+
+        if(maxDynamicMountPoints > 0)
+            pluginConfig->maxDynamicMountPoints = maxDynamicMountPoints;
+    }
+
 
     janus_config_array* streamsList =
         janus_config_get(config, NULL, janus_config_type_array, "streams");
