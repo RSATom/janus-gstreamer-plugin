@@ -22,6 +22,7 @@ endif()
 file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     plugins/gstreamer/[^.]*.cpp
     plugins/gstreamer/[^.]*.h
+    conf/*.jcfg
     snap/snapcraft.yaml
     snap/hooks/install
     README.md)
