@@ -329,6 +329,9 @@ static void PluginMain()
 
     g_main_loop_run(loop);
 
+    context.mountPoints.clear();
+    context.dynamicMountPoints.clear();
+
     context.loopPtr.reset();
     context.mainContextPtr.reset();
 
