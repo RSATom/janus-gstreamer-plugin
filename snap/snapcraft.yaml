@@ -49,6 +49,7 @@ parts:
     stage-packages:
       - gstreamer1.0-plugins-base
       - gstreamer1.0-plugins-good
+      - libslang2
 
 apps:
   janus-gateway:
