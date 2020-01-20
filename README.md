@@ -3,9 +3,6 @@
 # janus-gstreamer-plugin
 GStreamer plugin for Janus Gateway
 
-## Demo
-https://camproxy.ru
-
 ## Build
 * Build and install Janus Gateway as described at https://github.com/meetecho/janus-gateway#compile
 * `git clone https://github.com/RSATom/janus-gstreamer-plugin.git && cd janus-gstreamer-plugin`
