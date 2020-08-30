@@ -11,6 +11,6 @@ GStreamer plugin for Janus Gateway
 ## Build from sources
 * Build and install Janus Gateway as described at https://github.com/meetecho/janus-gateway#compile
 * `git clone https://github.com/RSATom/janus-gstreamer-plugin.git --recursive && cd janus-gstreamer-plugin`
-* `autogen.sh`
+* `./autogen.sh`
 * `./configure --prefix=/path/to/installed/janus`
 * `make && make install`
