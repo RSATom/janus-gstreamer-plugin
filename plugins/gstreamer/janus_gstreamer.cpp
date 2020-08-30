@@ -87,6 +87,7 @@ extern "C" janus_plugin* create()
             .incoming_rtp          = nullptr,
             .incoming_rtcp         = nullptr,
             .incoming_data         = nullptr,
+            .data_ready            = nullptr,
             .slow_link             = nullptr,
             .hangup_media          = HangupMedia,
             .destroy_session       = DestroySession,
