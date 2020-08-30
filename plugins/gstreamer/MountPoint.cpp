@@ -254,10 +254,15 @@ void MountPoint::onBuffer(
     if(RestreamAs::None == s.restreamAs)
         return;
 
+    janus_plugin_rtp rtpPacket {
+        .video = RestreamAs::Video == s.restreamAs ? TRUE : FALSE,
+        .buffer = (char*)data,
+        .length = static_cast<uint16_t>(size)
+    };
+    janus_plugin_rtp_extensions_reset(&rtpPacket.extensions);
+
     for(JanusPluginSessionPtr& janusSession: s.listiners) {
-        _janus->relay_rtp(
-            janusSession.get(), RestreamAs::Video == s.restreamAs ? TRUE : FALSE,
-            (char*)data, size);
+        _janus->relay_rtp(janusSession.get(), &rtpPacket);
     }
 }
 
