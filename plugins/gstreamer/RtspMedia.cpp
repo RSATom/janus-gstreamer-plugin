@@ -1,5 +1,6 @@
 #include "RtspMedia.h"
 
+#include <string>
 #include <algorithm>
 
 #include <gst/app/gstappsink.h>
