@@ -1,4 +1,4 @@
-[![Snap Status](https://build.snapcraft.io/badge/RSATom/janus-gstreamer-plugin.svg)](https://build.snapcraft.io/user/RSATom/janus-gstreamer-plugin)
+[![Snap Status](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/janus-plus-gstreamer-plugin)
 
 # janus-gstreamer-plugin
 GStreamer plugin for Janus Gateway
